@@ -1,0 +1,18 @@
+{
+  "name": "disaster-radio-simulator",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "browserify index.js -o bundle.js",
+    "watch": "watchify index.js -o bundle.js",
+    "start": "http-server ./ -p 8000"
+  },
+  "dependencies": {
+    "http-server": "^0.11.1"
+  },
+  "devDependencies": {
+    "browserify": "^15.2.0",
+    "sigma": "^1.2.1",
+    "watchify": "^3.9.0"
+  },
+  "license": "AGPL-3.0"
+}
