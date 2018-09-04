@@ -17,4 +17,8 @@ var net = new Network({
 var node = net.nodes[0];
 console.log("Nodes within range of node 0:", net.nodesInRangeOf(node).length)
 
-node.tx("Test message")
+node.tx("Test message", function(err) {
+  if(err) return console.error(err);
+
+  console.log("Message sent");
+})
