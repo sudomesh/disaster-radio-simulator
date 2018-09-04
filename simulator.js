@@ -7,6 +7,10 @@ var net = new Network({
   width: 40000, // width of area to fill with nodes
   height: 40000, // height of area to fill with nodes
   debug: true
+}, {
+
+  // overwrite radio opts here if needed
+
 });
 
 
