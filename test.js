@@ -1,7 +1,7 @@
 
 var node = require('./node.js');
 
-var n = new node();
+var random = require('./random.js');
 
-console.log(n.getPacketTime("01234567"));
+
 

@@ -27,6 +27,11 @@ npm start
 # open browser to http://localhost:8000
 ```
 
+# ToDo
+
+* snr currently does nothing
+* rangeDelta currently does nothing
+* allow development of routing algorithm in other languages
 
 # license and copyright
 
