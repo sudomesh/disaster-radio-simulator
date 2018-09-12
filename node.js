@@ -15,6 +15,7 @@ function parsePackets(data) {
   while(got < data.length) {
   
     len = data.readUInt8(got);
+
     if(len < 1) {
       console.error("Got bad packet from external router!");
       process.exit(1);
@@ -67,25 +68,33 @@ function Node(opts, radioOpts, routerOpts) {
       this.router = spawn(cmd, args);
 
       this.router.on('close', function(code) {
-        console.error("Router", this.id, "exited with exit code", code);
+        console.error('[node ' + this.id + ' router]', "exited with exit code", code);
         this.router = null;
       }.bind(this));
 
-      this.stdoutBuffer = new Buffer();
+      this.stdoutBuffer = new Buffer('');
 
       this.router.stdout.on('data', function(data) {
-        var o = parsePackets(data);
+        this.stdoutBuffer = Buffer.concat([this.stdoutBuffer, data])
+
+        var o = parsePackets(this.stdoutBuffer);
 
         if(o.partial) {
-          this.stdoutBuffer = Buffer.concat(this.stdoutBuffer, o.partial);
+          this.stdoutBuffer = o.partial;
+        } else {
+          this.stdoutBuffer = new Buffer('');
         }
 
-        async.eachSeries(o.packets, this.tx, function(err) {
+        async.eachSeries(o.packets, this.tx.bind(this), function(err) {
           if(err) console.error(err);
 
-          // TODO how do we handle errors
+          // TODO handle error better
         });
 
+      }.bind(this));
+
+      this.router.stderr.on('data', function(data) {
+        console.log('[node ' + this.id + ' router]', data.toString());
       }.bind(this));
 
       this.extRouter = true;
@@ -94,7 +103,7 @@ function Node(opts, radioOpts, routerOpts) {
   }
 
   this.toString = function() {
-    return '[node] ' + this.id + ': ' + this.x + ', ' + this.y + ' - ' + this.radio;
+    return '[node ' + this.id + '] ' + this.x + ', ' + this.y + ' - ' + this.radio;
   }
 
   this.transmitting = false; // is transmit in progress
@@ -111,9 +120,30 @@ function Node(opts, radioOpts, routerOpts) {
     }
   }
 
+  this.txQueue = [];
+
+
   this.tx = function(data, cb) {
+    if(!data) {
+      if(!this.txQueue.length) return;
+      var o = this.txQueue[this.txQueue.length-1];
+      this.txQueue = this.txQueue.slice(1);
+      data = o.data;
+      cb = o.cb;
+    }
+
     cb = cb || function(){};
-    if(this.transmitting) return cb(new Error("transmit already in progress"));
+
+    if(this.transmitting) {
+
+      this.txQueue.push({
+        data: data,
+        cb: cb
+      });
+      return;
+    }
+
+    console.log('[node ' + this.id + '] transmitting packet:', data.toString());
 
     this.interruptIncoming(); // transmitting interrupts messages being received
 
@@ -129,7 +159,7 @@ function Node(opts, radioOpts, routerOpts) {
     setTimeout(function() {
       this.transmitting = false;
       cb();
-      
+      this.tx(); // send more packets if there are any queued
     }.bind(this), time);
   }
 
@@ -165,16 +195,23 @@ function Node(opts, radioOpts, routerOpts) {
       throw new Error("Got packet with size > 256 bytes");
     }
 
+    if(this.opts.debug) {
+      console.log('[node ' + this.id + '] received packet: ' + packet.toString());
+    }
+
     if(!this.extRouter) {
       this.router.rx(packet);
       return;
     }
 
-    var b = Buffer.concat(new Buffer([msg.length]), new Buffer(msg));
+    var b = Buffer.concat([new Buffer([packet.length]), new Buffer(packet)]);
     this.router.stdin.write(b);
-  }
+  };
 
+
+  this.kill = function() {
+    if(this.router) this.router.kill();
+  };
 }
-
 
 module.exports = Node;

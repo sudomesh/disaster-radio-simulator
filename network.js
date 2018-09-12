@@ -64,7 +64,13 @@ function network(opts, radioOpts) {
   this.nodesInRangeOf = function(node) {
     return this.nodesWithinCircle(node.x, node.y, node.radio.opts.range, node);
   };
-  
+
+  this.kill = function() {
+    var i;
+    for(i=0; i < this.nodes.length; i++) {
+      this.nodes[i].kill();
+    }
+  };
 }
 
 module.exports = network;
