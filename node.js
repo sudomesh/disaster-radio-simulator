@@ -142,8 +142,10 @@ function Node(opts, radioOpts, routerOpts) {
       });
       return;
     }
-
-    console.log('[node ' + this.id + '] transmitting packet:', data.toString());
+    
+    if(this.opts.debug) {
+      console.log('[node ' + this.id + '] transmitting packet:', data.toString());
+    }
 
     this.interruptIncoming(); // transmitting interrupts messages being received
 
