@@ -27,6 +27,7 @@ function parsePackets(data) {
       }
     }
 
+
     packets.push(data.slice(got + 1, got + len + 1));
     got += len;
   }
@@ -79,11 +80,16 @@ function Node(opts, radioOpts, routerOpts) {
 
         var o = parsePackets(this.stdoutBuffer);
 
+        /*
         if(o.partial) {
+          console.error('[node ' + this.id + ' router]', "partial");
           this.stdoutBuffer = o.partial;
         } else {
+          console.error('[node ' + this.id + ' router]', "not partial");
           this.stdoutBuffer = new Buffer('');
         }
+        */
+        this.stdoutBuffer = new Buffer('');
 
         async.eachSeries(o.packets, this.tx.bind(this), function(err) {
           if(err) console.error(err);
@@ -148,7 +154,7 @@ function Node(opts, radioOpts, routerOpts) {
     }
 
     this.interruptIncoming(); // transmitting interrupts messages being received
-
+    
     var nodes = this.network.nodesInRangeOf(this);
 
     var i;
@@ -157,9 +163,11 @@ function Node(opts, radioOpts, routerOpts) {
     }
     this.transmitting = true;
     var time = this.radio.getPayloadTime(data);
+    this.transmitting = false;
 
     setTimeout(function() {
       this.transmitting = false;
+      console.log('[node ' + this.id + '] transmission completed in ' + time + "ms");
       cb();
       this.tx(); // send more packets if there are any queued
     }.bind(this), time);
