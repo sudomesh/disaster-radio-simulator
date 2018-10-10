@@ -1,8 +1,35 @@
 
-Experimenting with a pure javascript simulator for [disaster.radio](https://disaster.radio). Nothing works yet.
+A javascript network simulator for [disaster.radio](https://disaster.radio) routers written in C.
 
+# Firmware simulator
+First install dependencies for compiling the C process that is used by the simulator,
 
-# depencies
+```
+sudo apt update
+sudo apt install libssl-dev # this is the only one i needed
+```
+
+Next, compile the firmware,
+
+```
+cd routers
+make firmware
+```
+
+Finally, run the simulator,
+
+```
+cd ..
+./simulator.js
+```
+
+You can now play around with the network's configuration by modifying simulator.js
+The router firmware can be modified through the routers/firmware.c file, you'll need recompile it before re-running the simulator.
+
+# Visual simulator,
+This is not yet functional, but you can try running it like so,
+
+# dependencies
 
 ```
 npm install
@@ -37,3 +64,4 @@ npm start
 
 * Copyright 2018 Marc Juul
 * License: AGPLv3
+* `routers/` is dual licensed under both GPLv3 and AGPLv3
