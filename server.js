@@ -2,20 +2,40 @@ const WebSocket = require('ws');
 const port = 8086;
 
 const MESSAGE_TYPE_INIT = 'init';
+const MESSAGE_TYPE_TX = 'tx';
 
 class SimulatorServer {
   constructor({ simulator } = {}) {
     this.simulator = simulator;
-    console.log(`SimulatorServer started on port ${port}`);
+    
     this.wss = new WebSocket.Server({ port });
+    console.log(`SimulatorServer started on port ${port}`);
+    
+    // Send the initial model (nodes, world params, etc) to every new client
+    // that connects
     this.wss.on('connection', (client) => {
       console.log('SimulatorServer: new client connected');
       client.send(JSON.stringify(this.getModelInitData()));
     });
+
+    // Send model updates (e.g. transmissions) when they occur
+    simulator.on('tx', (message) => {
+      this.broadcast(JSON.stringify({
+        type: MESSAGE_TYPE_TX,
+        source_id: message.source.id,
+        target_ids: message.targets.map((n) => n.id),
+        time: message.time,
+        data: message.data
+      }));
+    });
+
+    // simulator.on('rx', () => {
+
+    // })
   }
 
   broadcast(data) {
-    wss.clients.forEach(function each(client) {
+    this.wss.clients.forEach(function each(client) {
       if (client.readyState === WebSocket.OPEN) {
         client.send(data);
       }
@@ -40,13 +60,5 @@ class SimulatorServer {
     };
   }
 }
-
-// simulator.on('tx', () => {
-
-// })
-
-// simulator.on('rx', () => {
-
-// })
 
 module.exports = SimulatorServer;

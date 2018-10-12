@@ -165,6 +165,15 @@ function Node(opts, radioOpts, routerOpts) {
     var time = this.radio.getPayloadTime(data);
     this.transmitting = false;
 
+    // Notify listeners that we're transmitting. The websocket server
+    // listens for these events and forwards to connected viz clients.
+    this.network.emit('tx', {
+      source: this,
+      targets: nodes,
+      time: time,
+      data: data
+    });
+
     setTimeout(function() {
       this.transmitting = false;
       console.log('[node ' + this.id + '] transmission completed in ' + time + "ms");

@@ -8,17 +8,27 @@ ws.addEventListener('open', (event) => {
 });
 
 ws.addEventListener('message', (event) => {
+  console.log(`Received message: ${event.data}`);
   let message = JSON.parse(event.data);
-  console.log(`Received message: ${message}`);
+  
   if (message.type === 'init') {
     initModel(message);
-  } else {
-
+  } else if (message.type === 'tx') {
+    transmitPacket(message);
   }
 });
 
+let model = window.model = {
+  nodes: [],
+  packets: [],
+  world: {}
+};
+
+let svg = d3.select('#plot');
+
 function initModel({ nodes, world }) {
-  let svg = d3.select('#plot');
+  model.nodes = nodes;
+  model.world = world;
 
   svg.attr('viewBox', `0 0 ${world.width} ${world.height}`);
   svg.style('width', `${document.documentElement.clientWidth}px`);
@@ -26,8 +36,7 @@ function initModel({ nodes, world }) {
 
   let nodesGroup = svg.append('g')
     .attr('class', 'nodes');
-
-  nodesGroup.selectAll('.node-container').data(nodes)
+  nodesGroup.selectAll('.node-container').data(model.nodes)
     .enter()
     .append('circle')
       .attr('cx', (d) => d.x)
@@ -36,5 +45,54 @@ function initModel({ nodes, world }) {
       .style('fill', 'rgba(0, 255, 0, 0.5)');
   
   console.log(nodes);
+}
 
+let packetsGroup = svg.append('g')
+  .attr('class', 'packets');
+
+function transmitPacket({ source_id, target_ids, time, data }) {
+  let sourceNode = model.nodes.find((n) => n.id === source_id);
+  if (!sourceNode) {
+    console.warn(`Could not find node with id ${source_id}. This shouldn't happen.`);
+    return;
+  }
+
+  // create one new packet per target id
+  let newPackets = target_ids.map((id) => {
+    return {
+      source_id: source_id,
+      target_id: id,
+      data: data,
+      time: time
+    };
+  });
+  model.packets = model.packets.concat(newPackets);
+  
+  let newPacketEls = packetsGroup.selectAll('.packet-container').data(model.packets)
+    .enter()
+    .append('g')
+      .attr('class', 'packet-container')
+      .attr('transform', `translate(${sourceNode.x}, ${sourceNode.y})`)
+  
+  newPacketEls
+    .transition()
+    .duration(time * 10) // make the animation 1/10th actual speed
+    .attr('transform', (packet) => {
+      let targetNode = model.nodes.find((n) => n.id === packet.target_id);
+      if (!targetNode) {
+        console.warn(`Could not find node with id ${packet.target_id}. This shouldn't happen.`);
+        return;
+      }
+      return `translate(${targetNode.x}, ${targetNode.y})`;
+    })
+    .on('end', (packet) => {
+      // delete the packet once it arrives at its destination
+      model.packets = model.packets.filter((p) => p !== packet); 
+    })
+    .remove();
+
+  newPacketEls.append('text')
+    .attr('font-size', '50px')
+    .attr('fill', 'lime')
+    .text('packet');
 }
