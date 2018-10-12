@@ -6,16 +6,15 @@ html {
 }
 
 body {
-
-
+  margin: 0px;
+  padding: 0px;
 }
 
 #container {
-    width: 500px;
-    height: 500px;
+  position: absolute;
+  top: 0px; right: 0px;
+  bottom: 0px; left: 0px;
 }
 
 #plot {
-    width: 100%;
-    height: 100%;
 }

@@ -71,6 +71,19 @@ function network(opts, radioOpts) {
       this.nodes[i].kill();
     }
   };
+
+  // simple event emitter interface. The websocket server uses this to listen
+  // for transmission events to forward to viz clients.
+
+  this.on = function(eventName, cb) {
+    this._callbacks = this._callbacks || {};
+    this._callbacks[eventName] = this._callbacks[eventName] || [];
+    this._callbacks[eventName].push(cb);
+  }
+
+  this.emit = function(eventName, message) {
+    this._callbacks[eventName].forEach((cb) => cb(message));
+  }
 }
 
 module.exports = network;

@@ -1,62 +1,98 @@
+const d3 = window.d3 = require('d3');
 
+const wsUrl = 'ws://localhost:8086';
+const ws = new WebSocket(wsUrl);
 
-var d3 = require('d3');
-var c = d3.select('#plot')
+ws.addEventListener('open', (event) => {
+  console.log(`Connected to ${wsUrl}`);
+});
 
-/*
-  // experimental pan/zoom (not working well)
-  c.call(d3.zoom().on("zoom", function () {
-    c.attr("transform", d3.event.transform)
-  }))
-*/
-
-
-var dotData = [
-  {
-    x: Math.round(Math.random()*500),
-    y: Math.round(Math.random()*500),
-    radius: 10
-  },
-  {
-    x: Math.round(Math.random()*500),
-    y: Math.round(Math.random()*500),
-    radius: 25
-  }
-];
-
-function drawLine() {
-  c.append("line")
-    .attr('x1', dotData[0].x)
-    .attr('y1', dotData[0].y)
-    .attr('x2', dotData[1].x)
-    .attr('y2', dotData[1].y)
-    .attr('stroke-width', 2)
-    .attr('stroke', 'blue');
-}
-
-
-function update() {
-  var dots = c.selectAll('circle')
+ws.addEventListener('message', (event) => {
+  console.log(`Received message: ${event.data}`);
+  let message = JSON.parse(event.data);
   
-  var newDots = dots
-    .data(dotData)
+  if (message.type === 'init') {
+    initModel(message);
+  } else if (message.type === 'tx') {
+    transmitPacket(message);
+  }
+});
+
+let model = window.model = {
+  nodes: [],
+  packets: [],
+  world: {}
+};
+
+let svg = d3.select('#plot');
+
+function initModel({ nodes, world }) {
+  model.nodes = nodes;
+  model.world = world;
+
+  svg.attr('viewBox', `0 0 ${world.width} ${world.height}`);
+  svg.style('width', `${document.documentElement.clientWidth}px`);
+  svg.style('height', `${document.documentElement.clientHeight}px`);
+
+  let nodesGroup = svg.append('g')
+    .attr('class', 'nodes');
+  nodesGroup.selectAll('.node-container').data(model.nodes)
     .enter()
     .append('circle')
-
-  newDots
-    .attr('cx', function(o) {
-      return o.x;
-    })
-    .attr('cy', function(o) {
-      return o.y;
-    })
-    .attr('r', function(o) {
-      return o.radius;
-    })
-    .style('fill', 'green');
+      .attr('cx', (d) => d.x)
+      .attr('cy', (d) => d.y)
+      .attr('r', 40)
+      .style('fill', 'rgba(0, 255, 0, 0.5)');
   
+  console.log(nodes);
 }
 
-//drawLine();
-update();
+let packetsGroup = svg.append('g')
+  .attr('class', 'packets');
 
+function transmitPacket({ source_id, target_ids, time, data }) {
+  let sourceNode = model.nodes.find((n) => n.id === source_id);
+  if (!sourceNode) {
+    console.warn(`Could not find node with id ${source_id}. This shouldn't happen.`);
+    return;
+  }
+
+  // create one new packet per target id
+  let newPackets = target_ids.map((id) => {
+    return {
+      source_id: source_id,
+      target_id: id,
+      data: data,
+      time: time
+    };
+  });
+  model.packets = model.packets.concat(newPackets);
+  
+  let newPacketEls = packetsGroup.selectAll('.packet-container').data(model.packets)
+    .enter()
+    .append('g')
+      .attr('class', 'packet-container')
+      .attr('transform', `translate(${sourceNode.x}, ${sourceNode.y})`)
+  
+  newPacketEls
+    .transition()
+    .duration(time * 10) // make the animation 1/10th actual speed
+    .attr('transform', (packet) => {
+      let targetNode = model.nodes.find((n) => n.id === packet.target_id);
+      if (!targetNode) {
+        console.warn(`Could not find node with id ${packet.target_id}. This shouldn't happen.`);
+        return;
+      }
+      return `translate(${targetNode.x}, ${targetNode.y})`;
+    })
+    .on('end', (packet) => {
+      // delete the packet once it arrives at its destination
+      model.packets = model.packets.filter((p) => p !== packet); 
+    })
+    .remove();
+
+  newPacketEls.append('text')
+    .attr('font-size', '50px')
+    .attr('fill', 'lime')
+    .text('packet');
+}

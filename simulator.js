@@ -2,6 +2,7 @@
 
 var Network = require('./network.js');
 var process = require('process');
+var SimulatorServer = require('./server.js');
 
 var net = new Network({
   count: 3, // number of nodes in area
@@ -14,6 +15,8 @@ var net = new Network({
   // overwrite radio opts here if needed
 
 });
+
+var simulatorServer = new SimulatorServer({ simulator: net });
 
 
 var node = net.nodes[0];
