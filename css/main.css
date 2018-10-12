@@ -1,3 +1,7 @@
+@font-face {
+  font-family: 'VT323';
+  src: url("/fonts/VT323/VT323-Regular.ttf");
+}
 
 html {
     background-color: #1e1e1e;
@@ -11,9 +15,10 @@ body {
 }
 
 #title {
-  font-size: 20px;
-  font-family: monospace;
+  font-size: 40px;
+  font-family: 'VT323', monospace;
   color: lime;
+  margin: 10px 20px;
 }
 
 #container {
@@ -27,7 +32,7 @@ body {
 
 #error {
   position: absolute;
-  top: 40px;
+  top: 80px;
   left: 40px;
   font-size: 30px;
   color: orange;

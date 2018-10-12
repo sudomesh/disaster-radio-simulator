@@ -116,7 +116,9 @@ function transmitPacket({ source_id, target_ids, time, data }) {
     .remove();
 
   newPacketEls.append('text')
-    .attr('font-size', '50px')
+    .attr('class', 'packet-text')
+    .attr('font-size', '60px')
+    .attr('font-family', 'VT323')
     .attr('fill', 'lime')
     .text('packet');
 }
