@@ -1,62 +1,40 @@
+const d3 = window.d3 = require('d3');
 
+const wsUrl = 'ws://localhost:8086';
+const ws = new WebSocket(wsUrl);
 
-var d3 = require('d3');
-var c = d3.select('#plot')
+ws.addEventListener('open', (event) => {
+  console.log(`Connected to ${wsUrl}`);
+});
 
-/*
-  // experimental pan/zoom (not working well)
-  c.call(d3.zoom().on("zoom", function () {
-    c.attr("transform", d3.event.transform)
-  }))
-*/
+ws.addEventListener('message', (event) => {
+  let message = JSON.parse(event.data);
+  console.log(`Received message: ${message}`);
+  if (message.type === 'init') {
+    initModel(message);
+  } else {
 
-
-var dotData = [
-  {
-    x: Math.round(Math.random()*500),
-    y: Math.round(Math.random()*500),
-    radius: 10
-  },
-  {
-    x: Math.round(Math.random()*500),
-    y: Math.round(Math.random()*500),
-    radius: 25
   }
-];
+});
 
-function drawLine() {
-  c.append("line")
-    .attr('x1', dotData[0].x)
-    .attr('y1', dotData[0].y)
-    .attr('x2', dotData[1].x)
-    .attr('y2', dotData[1].y)
-    .attr('stroke-width', 2)
-    .attr('stroke', 'blue');
-}
+function initModel({ nodes, world }) {
+  let svg = d3.select('#plot');
 
+  svg.attr('viewBox', `0 0 ${world.width} ${world.height}`);
+  svg.style('width', `${document.documentElement.clientWidth}px`);
+  svg.style('height', `${document.documentElement.clientHeight}px`);
 
-function update() {
-  var dots = c.selectAll('circle')
-  
-  var newDots = dots
-    .data(dotData)
+  let nodesGroup = svg.append('g')
+    .attr('class', 'nodes');
+
+  nodesGroup.selectAll('.node-container').data(nodes)
     .enter()
     .append('circle')
-
-  newDots
-    .attr('cx', function(o) {
-      return o.x;
-    })
-    .attr('cy', function(o) {
-      return o.y;
-    })
-    .attr('r', function(o) {
-      return o.radius;
-    })
-    .style('fill', 'green');
+      .attr('cx', (d) => d.x)
+      .attr('cy', (d) => d.y)
+      .attr('r', 40)
+      .style('fill', 'rgba(0, 255, 0, 0.5)');
   
+  console.log(nodes);
+
 }
-
-//drawLine();
-update();
-
