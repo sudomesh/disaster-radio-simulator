@@ -7,6 +7,8 @@ html {
   background-color: #1e1e1e;
   color: #888788;
   font-family: 'VT323', monospace;
+  font-size: 40px;
+  color: lime;
 }
 
 body {
@@ -16,8 +18,19 @@ body {
 
 #title {
   font-size: 40px;
-  color: lime;
   margin: 10px 20px;
+}
+
+#buttons {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.button:active {
+  color: darkgreen;
 }
 
 #container {

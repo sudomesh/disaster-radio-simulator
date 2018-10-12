@@ -1,4 +1,5 @@
 const d3 = window.d3 = require('d3');
+const emojis = require('emoji.json/emoji-compact.json');
 
 const wsUrl = 'ws://localhost:8086';
 const ws = new WebSocket(wsUrl);
@@ -22,7 +23,6 @@ function appendError(message) {
 
 function checkConnected() {
   setTimeout(() => {
-    console.log(ws.readyState);
     if (ws.readyState === 0) {
       checkConnected();
     } else if (ws.readyState !== 1) {
@@ -45,10 +45,24 @@ ws.addEventListener('message', (event) => {
 let model = window.model = {
   nodes: [],
   packets: [],
-  world: {}
+  world: {},
+  modes: ['emoji', 'packet'],
+  modeIndex: 0
 };
 
 let svg = d3.select('#plot');
+let nodesGroup = svg.append('g')
+  .attr('class', 'nodes');
+let packetsGroup = svg.append('g')
+  .attr('class', 'packets');
+
+window.toggleViewMode = function() {
+  model.modeIndex = (model.modeIndex + 1) % model.modes.length;
+}
+
+function getViewMode() {
+  return model.modes[model.modeIndex];
+}
 
 function initModel({ nodes, world }) {
   model.nodes = nodes;
@@ -58,8 +72,6 @@ function initModel({ nodes, world }) {
   svg.style('width', `${document.documentElement.clientWidth}px`);
   svg.style('height', `${document.documentElement.clientHeight}px`);
 
-  let nodesGroup = svg.append('g')
-    .attr('class', 'nodes');
   nodesGroup.selectAll('.node-container').data(model.nodes)
     .enter()
     .append('circle')
@@ -71,9 +83,6 @@ function initModel({ nodes, world }) {
   console.log(nodes);
 }
 
-let packetsGroup = svg.append('g')
-  .attr('class', 'packets');
-
 function transmitPacket({ source_id, target_ids, time, data }) {
   let sourceNode = model.nodes.find((n) => n.id === source_id);
   if (!sourceNode) {
@@ -82,12 +91,14 @@ function transmitPacket({ source_id, target_ids, time, data }) {
   }
 
   // create one new packet per target id
+  let packetEmoji = emojis[Math.floor(Math.random() * emojis.length)];
   let newPackets = target_ids.map((id) => {
     return {
       source_id: source_id,
       target_id: id,
       data: data,
-      time: time
+      time: time,
+      emoji: packetEmoji
     };
   });
   model.packets = model.packets.concat(newPackets);
@@ -120,5 +131,5 @@ function transmitPacket({ source_id, target_ids, time, data }) {
     .attr('font-size', '60px')
     .attr('font-family', 'VT323')
     .attr('fill', 'lime')
-    .text('packet');
+    .text((packet) => getViewMode() === 'emoji' ? packet.emoji : 'packet');
 }
