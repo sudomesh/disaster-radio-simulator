@@ -27,7 +27,7 @@ You can now play around with the network's configuration by modifying simulator.
 The router firmware can be modified through the routers/firmware.c file, you'll need recompile it before re-running the simulator.
 
 # Visual simulator,
-This is not yet functional, but you can try running it like so,
+This is now functional!
 
 # dependencies
 
@@ -48,11 +48,12 @@ npm run watch
 ```
 
 # run
-
 ```
 npm start
 # open browser to http://localhost:8000
 ```
+
+The simulator needs to already be running when you load the webpage.
 
 # ToDo
 
