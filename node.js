@@ -100,7 +100,7 @@ function Node(opts, radioOpts, routerOpts) {
       }.bind(this));
 
       this.router.stderr.on('data', function(data) {
-        console.log('[node ' + this.id + ' router]', data.toString());
+          process.stderr.write(data.toString());
       }.bind(this));
 
       this.extRouter = true;
@@ -176,7 +176,9 @@ function Node(opts, radioOpts, routerOpts) {
 
     setTimeout(function() {
       this.transmitting = false;
-      console.log('[node ' + this.id + '] transmission completed in ' + time + "ms");
+      if(this.opts.debug) {
+        console.log('[node ' + this.id + '] transmission completed in ' + time + "ms");
+      }
       cb();
       this.tx(); // send more packets if there are any queued
     }.bind(this), time);
