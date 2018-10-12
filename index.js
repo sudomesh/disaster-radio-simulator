@@ -2,10 +2,34 @@ const d3 = window.d3 = require('d3');
 
 const wsUrl = 'ws://localhost:8086';
 const ws = new WebSocket(wsUrl);
+checkConnected();
 
 ws.addEventListener('open', (event) => {
   console.log(`Connected to ${wsUrl}`);
 });
+
+ws.addEventListener('close', (event) => {
+  appendError('WebSocket closed :(\n');
+});
+
+ws.addEventListener('error', (event) => {
+  appendError('WebSocket error :(\n');
+});
+
+function appendError(message) {
+  document.getElementById('error').innerText += message;
+}
+
+function checkConnected() {
+  setTimeout(() => {
+    console.log(ws.readyState);
+    if (ws.readyState === 0) {
+      checkConnected();
+    } else if (ws.readyState !== 1) {
+      appendError('Could not connect to WebSocket. Are you sure the simulator is running? Try ./simulator.js');
+    }
+  }, 1000);
+}
 
 ws.addEventListener('message', (event) => {
   console.log(`Received message: ${event.data}`);

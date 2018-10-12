@@ -10,6 +10,12 @@ body {
   padding: 0px;
 }
 
+#title {
+  font-size: 20px;
+  font-family: monospace;
+  color: lime;
+}
+
 #container {
   position: absolute;
   top: 0px; right: 0px;
@@ -17,4 +23,12 @@ body {
 }
 
 #plot {
+}
+
+#error {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  font-size: 30px;
+  color: orange;
 }
