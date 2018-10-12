@@ -30,30 +30,25 @@ The router firmware can be modified through the routers/firmware.c file, you'll 
 This is now functional!
 
 # dependencies
-
 ```
 npm install
 ```
 
 # build
-
 ```
 npm run build
-```
-
-# develop
-
-```
-npm run watch
 ```
 
 # run
 ```
 npm start
-# open browser to http://localhost:8000
 ```
+Be sure to start the simulator if you haven't already (see above), and open a browser to http://localhost:8000.
 
-The simulator needs to already be running when you load the webpage.
+# develop
+```
+npm run watch
+```
 
 # ToDo
 
