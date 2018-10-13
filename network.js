@@ -13,8 +13,8 @@ function network(opts, radioOpts) {
   }, opts || {});
 
   this.radioOpts = xtend({
-    range: [500, 1000], // min and max range of nodes (meters)
-    rangeDelta: [0.0, 0.2], // min/max range variation for a node over time (in %)
+    range: [800, 800], // min and max range of nodes (meters)
+    rangeDelta: [0.0, 0.0], // min/max range variation for a node over time (in %)
     snr: [0.2, 0.8], // min/max signal to noise (0 to 1)
     snrDelta: [0.0, 2.0] // min/max snr variation for a node over time (in %)
   }, opts || {});

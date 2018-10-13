@@ -100,7 +100,7 @@ function Node(opts, radioOpts, routerOpts) {
       }.bind(this));
 
       this.router.stderr.on('data', function(data) {
-          process.stderr.write(data.toString());
+          process.stderr.write('[node ' + this.id + ' router] \n' + data.toString());
       }.bind(this));
 
       this.extRouter = true;
