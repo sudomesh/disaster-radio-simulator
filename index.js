@@ -1,6 +1,8 @@
 const d3 = window.d3 = require('d3');
 const emojis = require('emoji.json/emoji-compact.json');
 
+const util = require('./util.js');
+
 const wsUrl = 'ws://localhost:8086';
 const ws = new WebSocket(wsUrl);
 checkConnected();
@@ -91,7 +93,7 @@ function transmitPacket({ source_id, target_ids, time, data }) {
   }
 
   // create one new packet per target id
-  let packetEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+  let packetEmoji = getEmoji(util.parsePacket(data.data));
   let newPackets = target_ids.map((id) => {
     return {
       source_id: source_id,
@@ -132,4 +134,12 @@ function transmitPacket({ source_id, target_ids, time, data }) {
     .attr('font-family', 'VT323')
     .attr('fill', 'lime')
     .text((packet) => getViewMode() === 'emoji' ? packet.emoji : 'packet');
+}
+
+const emojiCache = window.emojiCache =  {}; // dict of emojis keyed by packet data
+function getEmoji(packet) {
+  if (!(packet.data in emojiCache)) {
+    emojiCache[packet.data] = emojis[Math.floor(Math.random() * emojis.length)]; 
+  }
+  return emojiCache[packet.data];
 }
