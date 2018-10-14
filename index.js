@@ -111,7 +111,7 @@ function transmitPacket({ source_id, target_ids, time, data }) {
   
   newPacketEls
     .transition()
-    .duration(time * 10) // make the animation 1/10th actual speed
+    .duration(time) // make the animation 1/10th actual speed
     .attr('transform', (packet) => {
       let targetNode = model.nodes.find((n) => n.id === packet.target_id);
       if (!targetNode) {
@@ -128,7 +128,7 @@ function transmitPacket({ source_id, target_ids, time, data }) {
 
   newPacketEls.append('text')
     .attr('class', 'packet-text')
-    .attr('font-size', '60px')
+    .attr('font-size', '100px')
     .attr('font-family', 'VT323')
     .attr('fill', 'lime')
     .text((packet) => getViewMode() === 'emoji' ? packet.emoji : 'packet');
