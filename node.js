@@ -163,6 +163,7 @@ function Node(opts, radioOpts, routerOpts) {
     }
     this.transmitting = true;
     var time = this.radio.getPayloadTime(data);
+    time = this.network.getSimulationTime(time);
     this.transmitting = false;
 
     // Notify listeners that we're transmitting. The websocket server
@@ -197,6 +198,7 @@ function Node(opts, radioOpts, routerOpts) {
     this.incoming[msg.id] = msg;
 
     var time = this.radio.getPayloadTime(data);
+    time = this.network.getSimulationTime(time);
 
     setTimeout(function() {
       var m = this.incoming[msg.id];

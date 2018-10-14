@@ -10,6 +10,8 @@ var net = new Network({
   height: 2000, // height of area to fill with nodes
   router: './routers/firmware > /dev/null',
   debug: false,
+  // 1 second in the simulation == 1 second in real life * timeDistortion
+  timeDistortion: 10
 }, {
 
   // overwrite radio opts here if needed

@@ -84,6 +84,11 @@ function network(opts, radioOpts) {
   this.emit = function(eventName, message) {
     this._callbacks[eventName].forEach((cb) => cb(message));
   }
+
+  // use this getter to stretch simulation time by a factor of this.timeDistortion
+  this.getSimulationTime = function(time) {
+    return this.opts.timeDistortion * time;
+  }
 }
 
 module.exports = network;
