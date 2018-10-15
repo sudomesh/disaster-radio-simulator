@@ -1,5 +1,6 @@
 function parsePacket(buffer) {
   return {
+    header:buffer.slice(0,16),
     ttl: buffer[0],
     totalLength: buffer[1],
     source: buffer.slice(2,8),

@@ -113,7 +113,7 @@ function transmitPacket({ source_id, target_ids, time, data }) {
   
   newPacketEls
     .transition()
-    .duration(time) // make the animation 1/10th actual speed
+    .duration(time*10) // make the animation 1/10th actual speed
     .attr('transform', (packet) => {
       let targetNode = model.nodes.find((n) => n.id === packet.target_id);
       if (!targetNode) {
@@ -138,8 +138,8 @@ function transmitPacket({ source_id, target_ids, time, data }) {
 
 const emojiCache = window.emojiCache =  {}; // dict of emojis keyed by packet data
 function getEmoji(packet) {
-  if (!(packet.data in emojiCache)) {
-    emojiCache[packet.data] = emojis[Math.floor(Math.random() * emojis.length)]; 
+  if (!(packet.header in emojiCache)) {
+    emojiCache[packet.header] = emojis[Math.floor(Math.random() * emojis.length)]; 
   }
-  return emojiCache[packet.data];
+  return emojiCache[packet.header];
 }
