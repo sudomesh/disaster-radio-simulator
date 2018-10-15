@@ -99,10 +99,11 @@ function Node(opts, radioOpts, routerOpts) {
 
       }.bind(this));
 
-      this.router.stderr.on('data', function(data) {
-          process.stderr.write('[node ' + this.id + ' router] \n' + data.toString());
-      }.bind(this));
-
+      if(this.id == this.opts.monitorNode){
+          this.router.stderr.on('data', function(data) {
+              process.stderr.write('[node ' + this.id + ' router] \n' + data.toString());
+          }.bind(this));
+      }
       this.extRouter = true;
     }
 

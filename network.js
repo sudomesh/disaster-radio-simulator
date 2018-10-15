@@ -7,6 +7,7 @@ function network(opts, radioOpts) {
 
   this.opts = xtend({
     count: 100, // number of nodes
+    monitorNode: 0,
     width: 20000, // width of area to fill with nodes
     height: 20000, // height of area to fill with nodes
     debug: false
@@ -16,7 +17,7 @@ function network(opts, radioOpts) {
     range: [800, 800], // min and max range of nodes (meters)
     rangeDelta: [0.0, 0.0], // min/max range variation for a node over time (in %)
     snr: [0.2, 0.8], // min/max signal to noise (0 to 1)
-    snrDelta: [0.0, 2.0] // min/max snr variation for a node over time (in %)
+    snrDelta: [0.0, 2.0], // min/max snr variation for a node over time (in %)
   }, opts || {});
 
   this.nodes = [];

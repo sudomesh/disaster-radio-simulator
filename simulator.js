@@ -5,7 +5,9 @@ var process = require('process');
 var SimulatorServer = require('./server.js');
 
 var net = new Network({
-  count: 8, // number of nodes in area
+  // network opts
+  count: 15, // number of nodes in area
+  monitorNode: 10,
   width: 2000, // width of area to fill with nodes
   height: 2000, // height of area to fill with nodes
   router: './routers/firmware > /dev/null',
@@ -13,9 +15,7 @@ var net = new Network({
   // 1 second in the simulation == 1 second in real life * timeDistortion
   timeDistortion: 10
 }, {
-
-  // overwrite radio opts here if needed
-
+  // radio opts
 });
 
 var simulatorServer = new SimulatorServer({ simulator: net });
