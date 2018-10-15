@@ -7,7 +7,7 @@ var SimulatorServer = require('./server.js');
 var net = new Network({
   // network opts
   count: 15, // number of nodes in area
-  monitorNode: 0, // choose a single node to debug, set to 0 to show all nodes
+  monitorNode: 9, // choose a single node to debug, set to 0 to show all nodes
   width: 2000, // width of area to fill with nodes
   height: 2000, // height of area to fill with nodes
   router: './routers/firmware > /dev/null',
@@ -30,8 +30,6 @@ node.tx("hop 0", function(err) {
 //  console.log("Message sent");
 })
 */
-var count = 0;
-setInterval(function(){ process.stderr.write("learning..." + count + "\r"); count++; }, 1000);
 
 process.on('exit', function () {
   net.kill();
