@@ -6,6 +6,7 @@ var random = require('./random.js');
 function network(opts, radioOpts) {
 
   this.opts = xtend({
+    netStructure: {},
     count: 100, // number of nodes
     monitorNode: 0,
     width: 20000, // width of area to fill with nodes
@@ -20,10 +21,17 @@ function network(opts, radioOpts) {
     snrDelta: [0.0, 2.0], // min/max snr variation for a node over time (in %)
   }, opts || {});
 
+
   this.nodes = [];
   
+  var count = this.opts.count;
+  if(this.opts.netStructure){
+    count = this.opts.netStructure.nodes.length
+  }
+
+  console.log(count);
   var i, n;
-  for(i=0; i < this.opts.count; i++) {
+  for(i=0; i < count; i++) {
     n = new Node(xtend(this.opts, {
       x: random.linear(0, this.opts.width),
       y: random.linear(0, this.opts.height),
@@ -38,6 +46,17 @@ function network(opts, radioOpts) {
 
     this.nodes.push(n);
     if(this.opts.debug) console.log(n.toString());
+  }
+
+  if(this.opts.netStructure){
+    console.log(this.opts.netStructure.nodes);
+    for(i in this.opts.netStructure.nodes){
+        this.nodes[i].x = this.opts.netStructure.nodes[i].x;
+        this.nodes[i].y = this.opts.netStructure.nodes[i].y;
+        this.nodes[i].range = this.opts.netStructure.nodes[i].range;
+    }
+    this.opts.width = this.opts.netStructure.world.width;
+    this.opts.height = this.opts.netStructure.world.height;
   }
 
   // find nodes within the specified circle;
