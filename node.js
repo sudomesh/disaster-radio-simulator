@@ -99,7 +99,7 @@ function Node(opts, radioOpts, routerOpts) {
 
       }.bind(this));
 
-      if(this.id == this.opts.monitorNode){
+      if(this.id == this.opts.monitorNode || this.opts.monitorNode == 0){
           this.router.stderr.on('data', function(data) {
               process.stderr.write('[node ' + this.id + ' router] \n' + data.toString());
           }.bind(this));
