@@ -4,7 +4,7 @@ const emojis = require('emoji.json/emoji-compact.json');
 const util = require('./util.js');
 
 const wsUrl = 'ws://localhost:8086';
-const ws = new WebSocket(wsUrl);
+const ws = window.ws = new WebSocket(wsUrl);
 checkConnected();
 
 ws.addEventListener('open', (event) => {
@@ -48,6 +48,7 @@ let model = window.model = {
   nodes: [],
   packets: [],
   world: {},
+  timeDistortion: null,
   modes: ['emoji', 'packet'],
   modeIndex: 0
 };
@@ -66,9 +67,10 @@ function getViewMode() {
   return model.modes[model.modeIndex];
 }
 
-function initModel({ nodes, world }) {
+function initModel({ nodes, world, timeDistortion }) {
   model.nodes = nodes;
   model.world = world;
+  model.timeDistortion = parseFloat(timeDistortion);
 
   svg.attr('viewBox', `0 0 ${world.width} ${world.height}`);
   svg.style('width', `${document.documentElement.clientWidth}px`);
@@ -113,7 +115,7 @@ function transmitPacket({ source_id, target_ids, time, data }) {
   
   newPacketEls
     .transition()
-    .duration(time*10) // make the animation 1/10th actual speed
+    .duration(time)
     .attr('transform', (packet) => {
       let targetNode = model.nodes.find((n) => n.id === packet.target_id);
       if (!targetNode) {
@@ -142,4 +144,21 @@ function getEmoji(packet) {
     emojiCache[packet.header] = emojis[Math.floor(Math.random() * emojis.length)]; 
   }
   return emojiCache[packet.header];
+}
+
+window.slowDownTime = () => {
+  model.timeDistortion *= 2;
+  sendTimeDistortionMessage(model.timeDistortion);
+}
+
+window.speedUpTime = () => {
+  model.timeDistortion /= 2;
+  sendTimeDistortionMessage(model.timeDistortion);
+}
+
+function sendTimeDistortionMessage(timeDistortion) {
+  ws.send(JSON.stringify({
+    type: 'set_time_distortion',
+    timeDistortion: timeDistortion
+  }));
 }

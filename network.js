@@ -11,7 +11,8 @@ function network(opts, radioOpts) {
     monitorNode: 0,
     width: 20000, // width of area to fill with nodes
     height: 20000, // height of area to fill with nodes
-    debug: false
+    debug: false,
+    timeDistortion: 1
   }, opts || {});
 
   this.radioOpts = xtend({

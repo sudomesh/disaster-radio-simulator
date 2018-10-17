@@ -73,7 +73,8 @@ class SimulatorServer {
       world: {
         width: this.simulator.opts.width,
         height: this.simulator.opts.height
-      }
+      },
+      timeDistortion: this.simulator.opts.timeDistortion
     };
   }
 }
