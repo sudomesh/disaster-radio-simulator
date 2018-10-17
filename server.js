@@ -1,8 +1,12 @@
 const WebSocket = require('ws');
 const port = 8086;
 
+// server types
 const MESSAGE_TYPE_INIT = 'init';
 const MESSAGE_TYPE_TX = 'tx';
+
+// client types
+const MESSAGE_TYPE_SET_TIME_DISTORTION = 'set_time_distortion';
 
 class SimulatorServer {
   constructor({ simulator } = {}) {
@@ -11,11 +15,14 @@ class SimulatorServer {
     this.wss = new WebSocket.Server({ port });
     console.log(`SimulatorServer started on port ${port}`);
     
-    // Send the initial model (nodes, world params, etc) to every new client
-    // that connects
     this.wss.on('connection', (client) => {
       console.log('SimulatorServer: new client connected');
+      
+      // Send the initial model (nodes, world params, etc) to every new client
+      // that connects
       client.send(JSON.stringify(this.getModelInitData()));
+
+      client.on('message', (msg) => this.handleClientMessage(JSON.parse(msg)));
     });
 
     // Send model updates (e.g. transmissions) when they occur
@@ -40,6 +47,16 @@ class SimulatorServer {
         client.send(data);
       }
     });
+  }
+
+  handleClientMessage(message) {
+    switch(message.type) {
+      case MESSAGE_TYPE_SET_TIME_DISTORTION:
+        this.simulator.setTimeDistortion(message.timeDistortion);
+        break;
+      default:
+        console.error(`Received message of unknown type: ${message.type}`);
+    }
   }
 
   getModelInitData() {

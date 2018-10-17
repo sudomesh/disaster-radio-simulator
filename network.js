@@ -109,6 +109,12 @@ function network(opts, radioOpts) {
   this.getSimulationTime = function(time) {
     return this.opts.timeDistortion * time;
   }
+
+  this.setTimeDistortion = function(timeDistortion) {
+    this.opts.timeDistortion = timeDistortion;
+    // broadcast the new timeDistortion value to all nodes
+    this.nodes.forEach((node) => node.sendMetaToRouter(`d${timeDistortion}`));
+  }
 }
 
 module.exports = network;
