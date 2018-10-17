@@ -103,7 +103,11 @@ function Node(opts, radioOpts, routerOpts) {
 
       if(this.id == this.opts.monitorNode || this.opts.monitorNode == 0){
           this.router.stderr.on('data', function(data) {
-              process.stderr.write('[node ' + this.id + ' router] \n' + data.toString());
+              if(this.opts.debug){
+                process.stderr.write('[node ' + this.id + ' router] \n' + data.toString());
+              }else{
+                process.stderr.write(data.toString());
+              }
           }.bind(this));
       }
       this.extRouter = true;
