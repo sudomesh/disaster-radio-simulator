@@ -165,10 +165,8 @@ function Node(opts, radioOpts, routerOpts) {
       nodes[i]._rx(data);
     }
     this.transmitting = true;
-    var meta_flag = 1;
-    var metadata = "t1";
-    var a = Buffer.concat([new Buffer([meta_flag]), new Buffer([metadata.length]), new Buffer(metadata)]);
-    this.router.stdin.write(a);
+    // transmitting on
+    this.sendMetaToRouter("t1");
     var time = this.radio.getPayloadTime(data);
     time = this.network.getSimulationTime(time);
 
@@ -186,10 +184,8 @@ function Node(opts, radioOpts, routerOpts) {
       if(this.opts.debug) {
         console.log('[node ' + this.id + '] transmission completed in ' + time + "ms");
       }
-      var meta_flag = 1;
-      var metadata = "t0";
-      var a = Buffer.concat([new Buffer([meta_flag]), new Buffer([metadata.length]), new Buffer(metadata)]);
-      this.router.stdin.write(a);
+      // transmitting off
+      this.sendMetaToRouter("t0");
       cb();
       this.tx(); // send more packets if there are any queued
     }.bind(this), time);
@@ -237,11 +233,17 @@ function Node(opts, radioOpts, routerOpts) {
       return;
     }
 
-    var meta_flag = 0;
-    var b = Buffer.concat([new Buffer([meta_flag]), new Buffer([packet.length]), new Buffer(packet)]);
-    this.router.stdin.write(b);
+    this.sendToRouter(packet);
   };
 
+  this.sendToRouter = function(packet, is_metadata=0) {
+    var b = Buffer.concat([new Buffer([is_metadata]), new Buffer([packet.length]), new Buffer(packet)]);
+    this.router.stdin.write(b);
+  }
+
+  this.sendMetaToRouter = function(metadata) {
+    this.sendToRouter(metadata, 1);
+  }
 
   this.kill = function() {
     if(this.router) this.router.kill();
