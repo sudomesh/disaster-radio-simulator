@@ -2,6 +2,11 @@ const d3 = window.d3 = require('d3');
 const emojis = require('emoji.json/emoji-compact.json');
 
 const util = require('./util.js');
+const {
+  MESSAGE_TYPE_INIT,
+  MESSAGE_TYPE_TX,
+  MESSAGE_TYPE_SET_TIME_DISTORTION
+} = require('./uiMessageTypes.js');
 
 const wsUrl = 'ws://localhost:8086';
 const ws = window.ws = new WebSocket(wsUrl);
@@ -37,9 +42,9 @@ ws.addEventListener('message', (event) => {
   console.log(`Received message: ${event.data}`);
   let message = JSON.parse(event.data);
   
-  if (message.type === 'init') {
+  if (message.type === MESSAGE_TYPE_INIT) {
     initModel(message);
-  } else if (message.type === 'tx') {
+  } else if (message.type === MESSAGE_TYPE_TX) {
     transmitPacket(message);
   }
 });
@@ -158,7 +163,7 @@ window.speedUpTime = () => {
 
 function sendTimeDistortionMessage(timeDistortion) {
   ws.send(JSON.stringify({
-    type: 'set_time_distortion',
+    type: MESSAGE_TYPE_SET_TIME_DISTORTION,
     timeDistortion: timeDistortion
   }));
 }
