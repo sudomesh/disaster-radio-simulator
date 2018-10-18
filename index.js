@@ -152,10 +152,11 @@ function transmitPacket({ source_id, target_ids, time, data }) {
 
 const emojiCache = window.emojiCache =  {}; // dict of emojis keyed by packet destination
 function getEmoji(packet) {
-  if (!(packet.destination in emojiCache)) {
-    emojiCache[packet.destination] = emojis[Math.floor(Math.random() * emojis.length)]; 
+  var key = packet.source+packet.destination+packet.sequence
+  if (!(key in emojiCache)) {
+    emojiCache[key] = emojis[Math.floor(Math.random() * emojis.length)]; 
   }
-  return emojiCache[packet.destination];
+  return emojiCache[key];
 }
 
 // Controls
