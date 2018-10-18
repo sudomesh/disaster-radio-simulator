@@ -54,8 +54,9 @@ let model = window.model = {
   packets: [],
   world: {},
   timeDistortion: null,
+  animationSpeed: '1',
   modes: ['emoji', 'packet'],
-  modeIndex: 0
+  mode: 'emoji'
 };
 
 let svg = d3.select('#plot');
@@ -64,12 +65,8 @@ let nodesGroup = svg.append('g')
 let packetsGroup = svg.append('g')
   .attr('class', 'packets');
 
-window.toggleViewMode = function() {
-  model.modeIndex = (model.modeIndex + 1) % model.modes.length;
-}
-
 function getViewMode() {
-  return model.modes[model.modeIndex];
+  return model.mode;
 }
 
 function initModel({ nodes, world, timeDistortion }) {
@@ -88,7 +85,9 @@ function initModel({ nodes, world, timeDistortion }) {
       .attr('cy', (d) => d.y)
       .attr('r', 40)
       .style('fill', 'rgba(0, 255, 0, 0.5)');
-  
+
+  renderControls();
+
   console.log(nodes);
 }
 
@@ -118,9 +117,17 @@ function transmitPacket({ source_id, target_ids, time, data }) {
       .attr('class', 'packet-container')
       .attr('transform', `translate(${sourceNode.x}, ${sourceNode.y})`)
   
+  let getAnimationTime = function(time) {
+    if (model.animationSpeed.endsWith('fixed')) {
+      return parseFloat(model.animationSpeed);
+    } else {
+      return parseFloat(model.animationSpeed) * time;
+    }
+  };
+
   newPacketEls
     .transition()
-    .duration(time)
+    .duration(getAnimationTime(time))
     .attr('transform', (packet) => {
       let targetNode = model.nodes.find((n) => n.id === packet.target_id);
       if (!targetNode) {
@@ -151,14 +158,32 @@ function getEmoji(packet) {
   return emojiCache[packet.destination];
 }
 
-window.slowDownTime = () => {
-  model.timeDistortion *= 2;
+// Controls
+
+
+
+window.setTimeDistortion = (timeDistortion) => {
+  model.timeDistortion = timeDistortion;
   sendTimeDistortionMessage(model.timeDistortion);
+  renderControls();
 }
 
-window.speedUpTime = () => {
-  model.timeDistortion /= 2;
-  sendTimeDistortionMessage(model.timeDistortion);
+window.setViewMode = function(mode) {
+  model.mode = mode;
+  renderControls();
+}
+
+window.setAnimationSpeed = function(speed) {
+  model.animationSpeed = speed;
+  renderControls();
+}
+
+function renderControls() {
+  d3.select('#controls').selectAll('.button')
+    .classed('toggled', function() {
+      let el = d3.select(this);
+      return model[el.attr('my-model')] == el.attr('my-value');
+    });
 }
 
 function sendTimeDistortionMessage(timeDistortion) {

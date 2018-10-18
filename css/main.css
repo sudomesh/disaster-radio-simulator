@@ -21,12 +21,32 @@ body {
   margin: 10px 20px;
 }
 
-#buttons {
+#controls {
   position: absolute;
   top: 10px;
   right: 20px;
+  font-size: 20px;
+}
+
+.control-row {
+  display: flex;
+}
+
+.control-title {
+  width: 150px;
+  text-align: right;
+  margin-right: 10px;
+}
+
+.button {
   text-decoration: underline;
   cursor: pointer;
+  margin-right: 10px;
+  color: #0f8f0f;
+}
+
+.button.toggled {
+  color: lime;
 }
 
 .button:active {

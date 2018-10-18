@@ -13,10 +13,26 @@
       </svg>
     </div>
     <div id="error"></div>
-    <div id="buttons">
-      <div class="button" onclick="toggleViewMode()">packet mode</div>
-      <div class="button" onclick="slowDownTime()">slower</div>
-      <div class="button" onclick="speedUpTime()">faster</div>
+    <div id="controls">
+      <div class="control-row">
+        <div class="control-title">packet mode:</div>
+        <div class="button" my-model="mode" my-value="emoji" onclick="setViewMode('emoji')">emoji</div>
+        <div class="button" my-model="mode" my-value="packet" onclick="setViewMode('packet')">packet</div>
+      </div>
+      <div class="control-row">
+        <div class="control-title">simulation speed:</div>
+        <div class="button" my-model="timeDistortion" my-value="10" onclick="setTimeDistortion(10)">0.1x</div>
+        <div class="button" my-model="timeDistortion" my-value="4" onclick="setTimeDistortion(4)">0.25x</div>
+        <div class="button" my-model="timeDistortion" my-value="2" onclick="setTimeDistortion(2)">0.5x</div>
+        <div class="button" my-model="timeDistortion" my-value="1" onclick="setTimeDistortion(1)">1x</div>
+        <div class="button" my-model="timeDistortion" my-value="0.5" onclick="setTimeDistortion(0.5)">2x</div>
+      </div>
+      <div class="control-row">
+        <div class="control-title">animation speed:</div>
+        <div class="button" my-model="animationSpeed" my-value="1000fixed" onclick="setAnimationSpeed('1000fixed')">1s fixed</div>
+        <div class="button" my-model="animationSpeed" my-value="2" onclick="setAnimationSpeed('2')">0.5x sim speed</div>
+        <div class="button" my-model="animationSpeed" my-value="1" onclick="setAnimationSpeed('1')">1x sim speed</div>
+      </div>
     </div>
     <script src="bundle.js"></script>
   </body>
