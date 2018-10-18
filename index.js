@@ -138,12 +138,12 @@ function transmitPacket({ source_id, target_ids, time, data }) {
     .text((packet) => getViewMode() === 'emoji' ? packet.emoji : 'packet');
 }
 
-const emojiCache = window.emojiCache =  {}; // dict of emojis keyed by packet data
+const emojiCache = window.emojiCache =  {}; // dict of emojis keyed by packet destination
 function getEmoji(packet) {
-  if (!(packet.header in emojiCache)) {
-    emojiCache[packet.header] = emojis[Math.floor(Math.random() * emojis.length)]; 
+  if (!(packet.destination in emojiCache)) {
+    emojiCache[packet.destination] = emojis[Math.floor(Math.random() * emojis.length)]; 
   }
-  return emojiCache[packet.header];
+  return emojiCache[packet.destination];
 }
 
 window.slowDownTime = () => {
