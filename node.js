@@ -35,6 +35,15 @@ function parsePackets(data) {
     packets: packets
   }
 }
+
+function randomMac(){
+  var mac = '';
+  var hexDigits = "0123456789ABCDEF";
+  for (var i = 0; i < 12  ; i++){
+    mac+=hexDigits.charAt(Math.round(Math.random() * 15));
+  }
+  return mac;
+}
   
 function Node(opts, radioOpts, routerOpts) {
 
@@ -52,6 +61,7 @@ function Node(opts, radioOpts, routerOpts) {
   this.x = this.opts.x;
   this.y = this.opts.y;
   this.id = this.opts.id;
+  this.mac = randomMac();
   this.network = this.opts.network
 
   this.radio = new Radio(radioOpts);
@@ -65,8 +75,7 @@ function Node(opts, radioOpts, routerOpts) {
       var args = this.opts.router.split(/\s+/);
       var cmd = args[0];
       args = args.slice(1);
-      args = args.concat(['-t', this.network.opts.timeDistortion,
-                          '>', '/dev/null'])
+      args = args.concat(['-t', this.network.opts.timeDistortion]);
 
       this.router = spawn(cmd, args);
 

@@ -66,6 +66,7 @@ class SimulatorServer {
           x: n.x,
           y: n.y,
           id: n.id,
+          mac: n.mac,
           range: n.radio.opts.range
         };
       }),

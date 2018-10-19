@@ -110,7 +110,7 @@ function initModel({ nodes, world, timeDistortion }) {
 
 function updateLabels(textLabels){
   let label = getLabelMode();
-  textLabels.text((d) => label === 'none' ? '' : (label === 'id' ? d.id : 'MAC'))
+  textLabels.text((d) => label === 'none' ? '' : (label === 'id' ? d.id : d.mac))
 }
 
 function transmitPacket({ source_id, target_ids, time, data }) {
