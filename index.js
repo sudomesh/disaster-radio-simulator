@@ -62,6 +62,8 @@ let model = window.model = {
 };
 
 let svg = d3.select('#plot');
+let labelsGroup = svg.append('g')
+  .attr('class', 'labels');
 let nodesGroup = svg.append('g')
   .attr('class', 'nodes');
 let packetsGroup = svg.append('g')
@@ -84,6 +86,17 @@ function initModel({ nodes, world, timeDistortion }) {
   svg.style('width', `${document.documentElement.clientWidth}px`);
   svg.style('height', `${document.documentElement.clientHeight}px`);
 
+  labelsGroup.selectAll('text').data(model.nodes)
+    .enter()
+    .append('text')
+      .attr('x', (d) => d.x)
+      .attr('y', (d) => d.y)
+      .attr('font-size', '100px')
+      .attr('font-family', 'VT323')
+      .attr('fill', 'lime');
+
+  updateLabels();
+
   nodesGroup.selectAll('.node-container').data(model.nodes)
     .enter()
     .append('circle')
@@ -92,25 +105,22 @@ function initModel({ nodes, world, timeDistortion }) {
       .attr('r', 40)
       .style('fill', 'rgba(0, 255, 0, 0.5)');
 
-  let text = svg.selectAll("text").data(model.nodes)
-    .enter()
-    .append("text")
-      .attr('x', (d) => d.x)
-      .attr('y', (d) => d.y)
-      .attr('font-size', '100px')
-      .attr('font-family', 'VT323')
-      .attr('fill', 'lime');
-
-  updateLabels(text);
-
   renderControls();
 
   console.log(nodes);
 }
 
-function updateLabels(textLabels){
-  let label = getLabelMode();
-  textLabels.text((d) => label === 'none' ? '' : (label === 'id' ? d.id : d.mac))
+function updateLabels(){
+  let mode = getLabelMode();
+  labelsGroup.selectAll('text').text((d) => {
+    if (mode === 'none') {
+      return '';
+    } else if (mode === 'id') {
+      return d.id;
+    } else if (mode === 'mac') {
+      return d.mac;
+    }
+  });
 }
 
 function transmitPacket({ source_id, target_ids, time, data }) {
@@ -191,8 +201,7 @@ window.setTimeDistortion = (timeDistortion) => {
 
 window.setLabelMode = function(label) {
   model.label = label;
-  let text = svg.selectAll("text");
-  updateLabels(text);
+  updateLabels();
   renderControls();
 }
 
