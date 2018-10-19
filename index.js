@@ -56,7 +56,9 @@ let model = window.model = {
   timeDistortion: null,
   animationSpeed: '1',
   modes: ['emoji', 'packet'],
-  mode: 'emoji'
+  mode: 'emoji',
+  labels: ['none', 'id', 'mac'],
+  label: 'mac'
 };
 
 let svg = d3.select('#plot');
@@ -67,6 +69,10 @@ let packetsGroup = svg.append('g')
 
 function getViewMode() {
   return model.mode;
+}
+
+function getLabelMode() {
+  return model.label;
 }
 
 function initModel({ nodes, world, timeDistortion }) {
@@ -86,9 +92,25 @@ function initModel({ nodes, world, timeDistortion }) {
       .attr('r', 40)
       .style('fill', 'rgba(0, 255, 0, 0.5)');
 
+  let text = svg.selectAll("text").data(model.nodes)
+    .enter()
+    .append("text")
+      .attr('x', (d) => d.x)
+      .attr('y', (d) => d.y)
+      .attr('font-size', '100px')
+      .attr('font-family', 'VT323')
+      .attr('fill', 'lime');
+
+  updateLabels(text);
+
   renderControls();
 
   console.log(nodes);
+}
+
+function updateLabels(textLabels){
+  let label = getLabelMode();
+  textLabels.text((d) => label === 'none' ? '' : (label === 'id' ? d.id : 'MAC'))
 }
 
 function transmitPacket({ source_id, target_ids, time, data }) {
@@ -161,11 +183,16 @@ function getEmoji(packet) {
 
 // Controls
 
-
-
 window.setTimeDistortion = (timeDistortion) => {
   model.timeDistortion = timeDistortion;
   sendTimeDistortionMessage(model.timeDistortion);
+  renderControls();
+}
+
+window.setLabelMode = function(label) {
+  model.label = label;
+  let text = svg.selectAll("text");
+  updateLabels(text);
   renderControls();
 }
 
