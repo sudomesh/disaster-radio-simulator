@@ -15,6 +15,12 @@
     <div id="error"></div>
     <div id="controls">
       <div class="control-row">
+        <div class="control-title">label mode:</div>
+        <div class="button" my-model="label" my-value="none" onclick="setLabelMode('none')">none</div>
+        <div class="button" my-model="label" my-value="id" onclick="setLabelMode('id')">id</div>
+        <div class="button" my-model="label" my-value="mac" onclick="setLabelMode('mac')">address</div>
+      </div>
+      <div class="control-row">
         <div class="control-title">packet mode:</div>
         <div class="button" my-model="mode" my-value="emoji" onclick="setViewMode('emoji')">emoji</div>
         <div class="button" my-model="mode" my-value="packet" onclick="setViewMode('packet')">packet</div>
