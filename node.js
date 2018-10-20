@@ -75,7 +75,7 @@ function Node(opts, radioOpts, routerOpts) {
       var args = this.opts.router.split(/\s+/);
       var cmd = args[0];
       args = args.slice(1);
-      args = args.concat(['-t', this.network.opts.timeDistortion, '-a', this.mac ]);
+      args = args.concat(['-t', this.network.opts.timeDistortion, '-a', this.mac, '-n', this.id ]);
 
       this.router = spawn(cmd, args);
 
