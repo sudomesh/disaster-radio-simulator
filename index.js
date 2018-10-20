@@ -66,6 +66,8 @@ let labelsGroup = svg.append('g')
   .attr('class', 'labels');
 let nodesGroup = svg.append('g')
   .attr('class', 'nodes');
+let routesGroup = svg.append('g')
+  .attr('class', 'routes');
 let packetsGroup = svg.append('g')
   .attr('class', 'packets');
 
@@ -94,7 +96,6 @@ function initModel({ nodes, world, timeDistortion }) {
       .attr('font-size', '100px')
       .attr('font-family', 'VT323')
       .attr('fill', 'lime');
-
   updateLabels();
 
   nodesGroup.selectAll('.node-container').data(model.nodes)
@@ -180,6 +181,30 @@ function transmitPacket({ source_id, target_ids, time, data }) {
     .attr('font-family', 'VT323')
     .attr('fill', 'lime')
     .text((packet) => getViewMode() === 'emoji' ? packet.emoji : 'packet');
+
+  // render route lines if it's a chat packet
+  let parsedPacket = util.parsePacket(data.data);
+  if (parsedPacket.typeReadable === 'chat') {
+    let nextHopNode = model.nodes.find((n) => n.mac === parsedPacket.nextHopReadable);
+    console.log(nextHopNode);
+    routesGroup.append('line')
+      .attr('x1', sourceNode.x)
+      .attr('y1', sourceNode.y)
+      .attr('x2', sourceNode.x)
+      .attr('y2', sourceNode.y)
+      .attr('stroke', 'lime')
+      .attr('stroke-dasharray', '40 20')
+      .attr('stroke-width', 5)
+      .attr('opacity', 1)
+      .transition()
+        .duration(getAnimationTime(time))
+        .attr('x2', nextHopNode.x)
+        .attr('y2', nextHopNode.y)
+        .transition()
+        .duration(5000)
+          .attr('opacity', 0)
+          .remove();
+  }
 }
 
 const emojiCache = window.emojiCache =  {}; // dict of emojis keyed by packet destination
