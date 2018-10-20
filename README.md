@@ -1,6 +1,8 @@
 
 A javascript network simulator for [disaster.radio](https://disaster.radio) routers written in C.
 
+![](screenshot.png?raw=true)
+
 # Firmware simulator
 First install dependencies for compiling the C process that is used by the simulator,
 
@@ -58,6 +60,6 @@ npm run watch
 
 # license and copyright
 
-* Copyright 2018 Marc Juul
-* License: AGPLv3
-* `routers/` is dual licensed under both GPLv3 and AGPLv3
+* Copyright 2018 Sudo Mesh 
+* javascript simulator is licensed AGPLv3
+* `routers/firmware.c` is dual-licensed under both GPLv3 and AGPLv3
