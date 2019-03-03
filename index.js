@@ -209,7 +209,7 @@ function transmitPacket({ source_id, target_ids, time, data }) {
 
 const emojiCache = window.emojiCache =  {}; // dict of emojis keyed by packet destination
 function getEmoji(packet) {
-  var key = packet.source+packet.destination+packet.sequence
+  var key = packet.source+packet.destination;
   if (!(key in emojiCache)) {
     emojiCache[key] = emojis[Math.floor(Math.random() * emojis.length)]; 
   }
