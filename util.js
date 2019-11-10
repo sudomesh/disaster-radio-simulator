@@ -16,7 +16,7 @@ function parsePacket(buffer) {
 function parseHexPair(twoHalves) {
   let firstHalf = twoHalves >> 4;
   let secondHalf = twoHalves & parseInt(1111, 2);
-  return firstHalf.toString(16).toUpperCase() + secondHalf.toString(16).toUpperCase();
+  return firstHalf.toString(16) + secondHalf.toString(16);
 }
 
 const packetTypes = {
@@ -26,5 +26,6 @@ const packetTypes = {
 };
 
 module.exports = {
-  parsePacket
+  parsePacket,
+  parseHexPair
 };

@@ -67,7 +67,8 @@ class SimulatorServer {
           y: n.y,
           id: n.id,
           mac: n.mac,
-          range: n.radio.opts.range
+          range: n.radio.opts.range,
+          routeTable: []
         };
       }),
       world: {

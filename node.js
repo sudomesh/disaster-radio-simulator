@@ -38,7 +38,7 @@ function parsePackets(data) {
 
 function randomMac(){
   var mac = '';
-  var hexDigits = "0123456789ABCDEF";
+  var hexDigits = "0123456789abcdef";
   for (var i = 0; i < 12  ; i++){
     mac+=hexDigits.charAt(Math.round(Math.random() * 15));
   }

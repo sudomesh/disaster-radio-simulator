@@ -38,6 +38,7 @@ function checkConnected() {
   }, 1000);
 }
 
+//Create event listener to initialize network plot and update on packet transmit
 ws.addEventListener('message', (event) => {
   console.log(`Received message: ${event.data}`);
   let message = JSON.parse(event.data);
@@ -70,6 +71,8 @@ let routesGroup = svg.append('g')
   .attr('class', 'routes');
 let packetsGroup = svg.append('g')
   .attr('class', 'packets');
+let tooltipGroup = svg.append('g')
+  .attr('class', 'tooltip');
 
 function getViewMode() {
   return model.mode;
@@ -88,6 +91,9 @@ function initModel({ nodes, world, timeDistortion }) {
   svg.style('width', `${document.documentElement.clientWidth}px`);
   svg.style('height', `${document.documentElement.clientHeight}px`);
 
+  tooltipGroup.selectAll('.tooltip-container').data(model.nodes)
+    .enter()
+
   labelsGroup.selectAll('text').data(model.nodes)
     .enter()
     .append('text')
@@ -104,11 +110,81 @@ function initModel({ nodes, world, timeDistortion }) {
       .attr('cx', (d) => d.x)
       .attr('cy', (d) => d.y)
       .attr('r', 40)
-      .style('fill', 'rgba(0, 255, 0, 0.5)');
+      .style('fill', 'rgba(0, 255, 0, 0.5)')
+      .on("mouseover", handleMouseOver)
+      .on("mouseout", handleMouseOut);
+      //.on("click", handleOnClick);
 
   renderControls();
 
   console.log(nodes);
+}
+
+// Create routing table pop up when mousing over node
+function handleMouseOver(d, i) {
+  //if there's no label enabled already, at a title label
+  let mode = getLabelMode();
+  if (mode === 'none') {
+    //add rect as background for routing table
+    tooltipGroup
+      .append("rect")
+        .attr("id", "r1")
+        .attr("x", d.x)
+         .attr("y", d.y - 90)
+         .attr("width", 840)
+         .attr("height", 220 + d.routeTable.length*110)
+         .style('fill', 'rgba(0, 128, 0, 1)');
+
+    tooltipGroup
+      .append('text')
+      .attr('id', 't0')
+       .attr('x', d.x)
+       .attr('y', d.y)
+       .attr('font-size', '100px')
+       .attr('font-family', 'VT323')
+       .attr('fill', 'lime')
+       .text(function(d){ return 'node ' + model.nodes[i].id + ': ' + model.nodes[i].mac; });
+       // this is the "wrong" way to deal with the text but I can't figure out the right way
+  }
+
+  // Create HTML table for routing table
+  let table = tooltipGroup
+    .append('foreignObject')
+      .attr('id', 't1')
+      .attr('x', d.x)
+      .attr('y', d.y)
+      .attr('width', 840)
+      .attr('height', 110 + d.routeTable.length*110)
+      .append('xhtml:body')
+        .append('table');
+ 
+  let header = table.append('thead').append('tr')
+
+  header.selectAll('th')
+    .data(['ID ', 'Destination  ', 'Hops  ', 'Mertic  '])
+    .enter()
+    .append('th')
+      .text((d) => { return d; });
+
+  let tablebody = table.append('tbody');
+  let rows = tablebody.selectAll('tr')
+    // get data from routing table array (formatted as array of arrays)
+    .data(d.routeTable)
+    .enter()
+    .append('tr');
+
+  let cells = rows.selectAll('td')
+    .data((d) => { return d; })
+    .enter()
+    .append('td')
+    .text((d) => { return d; });
+}
+
+function handleMouseOut(d, i) {
+    // Select elements by id and then remove
+    d3.select('#t0').remove();  // Remove title text
+    d3.select('#r1').remove();  // Remove background rect
+    d3.select('#t1').remove();  // Remove table
 }
 
 function updateLabels(){
@@ -186,7 +262,6 @@ function transmitPacket({ source_id, target_ids, time, data }) {
   let parsedPacket = util.parsePacket(data.data);
   if (parsedPacket.typeReadable === 'chat') {
     let nextHopNode = model.nodes.find((n) => n.mac === parsedPacket.nextHopReadable);
-    console.log(nextHopNode);
     routesGroup.append('line')
       .attr('x1', sourceNode.x)
       .attr('y1', sourceNode.y)
@@ -205,11 +280,30 @@ function transmitPacket({ source_id, target_ids, time, data }) {
           .attr('opacity', 0)
           .remove();
   }
+ 
+  // update UI route table if routing packet
+  if (parsedPacket.typeReadable === 'routing') {
+    var length = parsedPacket.totalLength;
+    var routes = parsedPacket.data;
+    var id, mac, hops, metric;
+    for(i = 0; i < length*(1/8); i++ ){
+        id = 0;
+        mac = routes.slice(i*8, (i*8)+6).map(util.parseHexPair).join('');
+        hops = routes[(i*8)+6];
+        metric = routes[(i*8)+7];
+        for(j = 0; j < model.nodes.length; j++){
+            if(model.nodes[j].mac == mac){
+                id = model.nodes[j].id;
+            }
+        }
+        sourceNode.routeTable[i] = [id, mac, hops, metric]
+    }
+  }
 }
 
 const emojiCache = window.emojiCache =  {}; // dict of emojis keyed by packet destination
 function getEmoji(packet) {
-  var key = packet.source+packet.destination+packet.sequence
+  var key = packet.source+packet.destination;
   if (!(key in emojiCache)) {
     emojiCache[key] = emojis[Math.floor(Math.random() * emojis.length)]; 
   }
