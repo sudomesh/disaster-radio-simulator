@@ -6,17 +6,18 @@ A javascript network simulator for the [disaster.radio](https://disaster.radio) 
 This simulator comes in two parts; a locally-run "firmware simulator" that provides console debugging output and a browser-based "visual simulator" that provides a visual representation of the firmware simulation output.
 
 # Firmware simulator
-First install dependencies for compiling the C process that is used by the simulator,
+First install dependencies for compiling the C process that is used by the simulator and ,
 
 ```
 sudo apt update
 sudo apt install libssl-dev # this is the only one i needed
 ```
 
-Next, compile the firmware,
+Next, get the latest LoRaLayer2 library by running `fetch_deps.sh` and compile the firmware,
 
 ```
 cd routers
+./fetch_deps.sh
 make firmware
 ```
 
@@ -63,4 +64,4 @@ npm run watch
 # License and copyright
 * Copyright 2018 Sudo Mesh 
 * javascript simulator is licensed AGPLv3
-* `routers/firmware.c` is dual-licensed under both GPLv3 and AGPLv3
+* `routers/main.cpp` is dual-licensed under both GPLv3 and AGPLv3

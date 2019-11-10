@@ -1,13 +1,10 @@
 
+all: firmware
 
-all: ping_example firmware
+LL2LIB=./libs/LoRaLayer2/src
 
-ping_example: ping_example.c base.c base.h
-	gcc -o ping_example ping_example.c base.c
-
-firmware: firmware.c base.c base.h
-	gcc -lpthread -lssl -lcrypto -o firmware firmware.c base.c
+firmware: main.cpp
+	gcc -I$(LL2LIB) -lpthread -lssl -lcrypto -o firmware main.cpp $(LL2LIB)/Layer1_Sim.cpp $(LL2LIB)/LoRaLayer2.cpp
 
 clean:
-	rm -f ping_example
 	rm -f firmware 
