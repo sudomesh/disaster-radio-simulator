@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <Layer1_Sim.h>
+#include <Layer1.h>
 #include <LoRaLayer2.h>
 
 int state = 0;
 int chance;
-long startTime;
-long lastRoutingTime;
 int dest;
 
 int _routeInterval = 10;
@@ -15,21 +13,23 @@ int _learningTimeout = 200;
 int _maxRandomDelay = 20;
 
 int routeInterval(){
-        return simulationTime(_routeInterval);
+        return Layer1.simulationTime(_routeInterval);
 }
 int learningTimeout(){
-        return simulationTime(_learningTimeout);
+        return Layer1.simulationTime(_learningTimeout);
 }
 int maxRandomDelay(){
-        return simulationTime(_maxRandomDelay);
+        return Layer1.simulationTime(_maxRandomDelay);
 }
 
 int setup(){
 
+    LL2.init();
+    LL2.setInterval(routeInterval());
     srand(time(NULL) + getpid());
-    uint8_t* myAddress = localAddress();
+    uint8_t* myAddress = Layer1.localAddress();
     Serial.printf("local address ");
-    printAddress(myAddress);
+    LL2.printAddress(myAddress);
     chance=rand()%15;
     if(chance == 1){
         Serial.printf(" will transmit");
@@ -40,15 +40,14 @@ int setup(){
     int wait = rand()%maxRandomDelay();
     Serial.printf("waiting %d s\n", wait);
     sleep(wait);
-
-    startTime = getTime();
-    lastRoutingTime = startTime;
     return 0;
 }
 
 int loop(){
-
-    if(begin_packet()){
+    if(Layer1.begin_packet()){
+        LL2.daemon();
+    }
+    /*
         checkBuffer(); 
         if(state == 0){
             long timestamp = transmitRoutes(routeInterval(), lastRoutingTime);
@@ -72,6 +71,6 @@ int loop(){
                 }
             }
         }
-    }
-    nsleep(0, 1000000*simulationTime(1));
+    */
+    Layer1.nsleep(0, 1000000*Layer1.simulationTime(1));
 }

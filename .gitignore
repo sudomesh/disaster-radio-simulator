@@ -3,3 +3,4 @@ bundle.js
 node_modules
 routers/libs
 routers/firmware
+package-lock.json
