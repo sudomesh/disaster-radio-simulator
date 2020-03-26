@@ -18,6 +18,11 @@ Next, get the latest LoRaLayer2 library by running `fetch_deps.sh` and compile t
 ```
 cd routers
 ./fetch_deps.sh
+```
+After running this, you will need to edit one line in the LoRaLayer2 library before compiling the firmware. Comment line 11  and uncomment line 12 in [routers/libs/LoRaLayer2/src/Layer1.h](https://github.com/sudomesh/LoRaLayer2/blob/master/src/Layer1.h#L11). This will enable the `Layer1_Sim` library instead of the `Layer1_LoRa` library.  
+
+Then you can compile the firmware with,
+```
 make firmware
 ```
 
