@@ -3,4 +3,6 @@ bundle.js
 node_modules
 routers/libs
 routers/firmware
+routers/static/index.htm
+routers/static/build
 package-lock.json

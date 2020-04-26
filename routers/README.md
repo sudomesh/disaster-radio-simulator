@@ -1,25 +1,16 @@
 
-These are the external routers (routing algorithms) written in C.
+This is a port of the disaster.radio firmware written in generic C++ (i.e. not for Arduino). 
 
-These communicate with the simulator using `stdin` and `stdout`.
+This firmware communicates with the simulator using `stdin` and `stdout`.
 
-Each external router must declare:
+The main.cpp of the firmware must declare:
 
 ```
 int setup(); // called once on startup
 int loop(); // called once per event loop iteration
-int packet_received(char* data, size_t len); // called when a packet is received
-```
-
-To send a packet call:
-
-```
-int send_packet(char* data, size_t len);
 ```
 
 If data is a null-terminated string then you can set len to 0 and it will be automatically determined. Remember that packets are maximum 256 bytes (not counting the optional null-terminator).
-
-A minimal external router example is available in `ping_example.c` and can be compiled with the command `make ping_example`.
 
 You can use the convenience function `Serial.printf()` to print debug output to `stderr` which will pass it to the javascript simulator and print it to stdout with a header that looks like this:
 

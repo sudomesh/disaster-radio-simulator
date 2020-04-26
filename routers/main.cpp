@@ -3,6 +3,17 @@
 #include <time.h>
 #include <Layer1.h>
 #include <LoRaLayer2.h>
+#include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/server.hpp>
+
+#include "server/DisasterRadio.h"
+// client
+#include "client/WebSocketppClient.h"
+#include "client/LoRaClient.h"
+
+WebSocketppServer ws_server;
+
+DisasterRadio *radio = new DisasterRadio();
 
 int state = 0;
 int chance;
@@ -22,14 +33,33 @@ int maxRandomDelay(){
         return Layer1.simulationTime(_maxRandomDelay);
 }
 
+void setupLoRa()
+{
+  Serial.printf("* Initializing LoRaLayer2...\r\n");
+  uint8_t* myAddress = LL2.localAddress();
+  LoRaClient *lora_client = new LoRaClient();
+  if (lora_client->init())
+  {
+    //Serial.printf(" --> LoRa address: %s\n", nodeAddress);
+    radio->connect(lora_client);
+    //loraInitialized = true;
+    return;
+  }
+  Serial.printf(" --> Failed to initialize LoRa\r\n");
+}
+
+void setupWebSocket(){
+  Serial.printf("* Initializing WebSocketpp...\r\n");
+  WebSocketppClient::startServer(&ws_server, [](WebSocketppClient *ws_client){
+    radio->connect(ws_client);
+  });
+}
+
 int setup(){
 
-    LL2.init();
-    LL2.setInterval(routeInterval());
     srand(time(NULL) + getpid());
-    uint8_t* myAddress = Layer1.localAddress();
-    Serial.printf("local address ");
-    LL2.printAddress(myAddress);
+    setupLoRa();
+    setupWebSocket();
     chance=rand()%15;
     if(chance == 1){
         Serial.printf(" will transmit");
@@ -44,33 +74,6 @@ int setup(){
 }
 
 int loop(){
-    if(Layer1.begin_packet()){
-        LL2.daemon();
-    }
-    /*
-        checkBuffer(); 
-        if(state == 0){
-            long timestamp = transmitRoutes(routeInterval(), lastRoutingTime);
-            if(timestamp){
-                lastRoutingTime = timestamp;
-            }
-            if(getTime() - startTime > learningTimeout()){
-                state++;
-                printNeighborTable();
-                printRoutingTable();
-            }
-        }else if(state == 1){
-            if(chance == 1){
-                long timestamp = transmitToRoute(routeInterval(), lastRoutingTime, dest);
-                dest++;
-                if(dest == getRouteEntry()){
-                    dest = 0;
-                }
-                if(timestamp){
-                    lastRoutingTime = timestamp;
-                }
-            }
-        }
-    */
+    radio->loop();
     Layer1.nsleep(0, 1000000*Layer1.simulationTime(1));
 }

@@ -3,30 +3,44 @@ A javascript network simulator for the [disaster.radio](https://disaster.radio) 
 
 ![](screenshot.png?raw=true)
 
-This simulator comes in two parts; a locally-run "firmware simulator" that provides console debugging output and a browser-based "visual simulator" that provides a visual representation of the firmware simulation output.
+This simulator comes in a two parts,
+* a full port of the disaster.radio firmware that can be run inside of a Linux system
+* a browser-based "visual simulator" that provides a visual representation of a full network of nodes running the firmware
 
-# Firmware simulator
-First install dependencies for compiling the C process that is used by the simulator and ,
+## Compile the firmware
+
+First install dependencies for compiling the C++ firmware that is used by the simulator,
 
 ```
 sudo apt update
-sudo apt install libssl-dev # this is the only one i needed
+sudo apt install libssl-dev websocketpp-dev-all
 ```
+You may require additionally dependencies, such as `gcc` if you do not regularly compile C code.  
 
-Next, get the latest LoRaLayer2 library by running `fetch_deps.sh` and compile the firmware,
-
+Next, get the latest LoRaLayer2 library by running `fetch_deps.sh`,  
 ```
 cd routers
 ./fetch_deps.sh
 ```
-After running this, you will need to edit one line in the LoRaLayer2 library before compiling the firmware. Comment line 11  and uncomment line 12 in [routers/libs/LoRaLayer2/src/Layer1.h](https://github.com/sudomesh/LoRaLayer2/blob/master/src/Layer1.h#L11). This will enable the `Layer1_Sim` library instead of the `Layer1_LoRa` library.  
 
-Then you can compile the firmware with,
+Then compile the firmware with,
 ```
 make firmware
 ```
 
-Finally, run the simulator,
+## Test the firmware
+
+Download the [latest release](https://github.com/sudomesh/disaster-radio/releases) of disaster.radio firmware. Unzip the download and copy the contents of the `web/static/` directory to `routers/static/`,
+
+Start a single disaster.radio node by running,
+```
+./firmware
+```
+Next open a browser and navigate to http://localhost:8080 and you should be greeted with the disaster.radio chat app. Trying entering a nickname and make sure `~<nickname> joined the channel` is printed.
+
+## Running the simulator
+
+Once the firmware has been compiled and test, you can run the simulator.
 
 ```
 cd ..
@@ -67,6 +81,6 @@ npm run watch
 * fix various bugs, https://github.com/sudomesh/disaster-radio-simulator/issues
 
 # License and copyright
-* Copyright 2018 Sudo Mesh 
+* Copyright 2020 Sudo Mesh
 * javascript simulator is licensed AGPLv3
-* `routers/main.cpp` is dual-licensed under both GPLv3 and AGPLv3
+* `routers/*` is dual-licensed under both GPLv3 and AGPLv3
