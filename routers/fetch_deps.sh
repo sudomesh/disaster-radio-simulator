@@ -8,6 +8,6 @@ mkdir -p libs
 cd libs/
 git clone https://github.com/sudomesh/LoRaLayer2
 cd LoRaLayer2/
-git checkout e8b5c4b8b8e675d9781c7673f25f49a1e653a4be
+git checkout bf5f8f8ac473d6847ef5b5d692cf721ef647ff2b
 cd ../..
 

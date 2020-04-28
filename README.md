@@ -3,9 +3,10 @@ A javascript network simulator for the [disaster.radio](https://disaster.radio) 
 
 ![](screenshot.png?raw=true)
 
-This simulator comes in a two parts,
-* a full port of the disaster.radio firmware that can be run inside of a Linux system
-* a browser-based "visual simulator" that provides a visual representation of a full network of nodes running the firmware
+This simulator comes in three parts,
+* `router` - a full port of the disaster.radio firmware that can be run inside of a Linux system
+* `simulator` - a node js script that creates a virtual network of disaster radio routers
+* `visualizer` - a browser-based "visual simulator" that provides a visual representation of the simulated network
 
 ## Compile the firmware
 
@@ -13,9 +14,8 @@ First install dependencies for compiling the C++ firmware that is used by the si
 
 ```
 sudo apt update
-sudo apt install libssl-dev websocketpp-dev-all
+sudo apt install build-essential libwebsocketpp-dev libboost_dev
 ```
-You may require additionally dependencies, such as `gcc` if you do not regularly compile C code.  
 
 Next, get the latest LoRaLayer2 library by running `fetch_deps.sh`,  
 ```
