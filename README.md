@@ -14,7 +14,7 @@ First install dependencies for compiling the C++ firmware that is used by the si
 
 ```
 sudo apt update
-sudo apt install build-essential libwebsocketpp-dev libboost_dev
+sudo apt install build-essential libwebsocketpp-dev libboost-dev
 ```
 
 Next, get the latest LoRaLayer2 library by running `fetch_deps.sh`,  
@@ -59,6 +59,7 @@ The default behavior is for the nodes to learn about their neighbors and for ~10
 If you'd like to know more about the default protocol being used by disaster.radio nodes, read [our wiki](https://github.com/sudomesh/disaster-radio/wiki/Protocol).
 
 # Visual simulator
+
 First install javascript dependencies, if you have not already,
 ```
 npm install

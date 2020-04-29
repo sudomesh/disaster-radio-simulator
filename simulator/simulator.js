@@ -12,7 +12,7 @@ var net = new Network({
   monitorNode: 0, // choose a single node to debug, set to 0 to show all nodes
   width: 3000, // width of area to fill with nodes (will be ignored if given network struct)
   height: 3000, // height of area to fill with nodes (will be ignored if given network struct)
-  router: './routers/firmware',
+  router: '../routers/firmware',
   debug: false,
   // 1 second in the simulation == 1 second in real life * timeDistortion
   timeDistortion: 1
