@@ -63,13 +63,23 @@ void SerialClient::loop(){
       //Error reading from serial port
       return;
     }
-    else
+    else if (length > 0)
     {
-        buffer[length] = '\0';
-        Serial.printf("%s", buffer);
+      buffer[length] = '\0';
+      struct Datagram datagram;
+      memcpy(datagram.destination, LL2.broadcastAddr(), ADDR_LENGTH);
+      datagram.type = 'c';
+      memcpy(datagram.message, buffer, length);
+      server->transmit(this, datagram, length + DATAGRAM_HEADER);
     }
   }
   else{
     serialInitialized = init();
   }
 }
+
+void SerialClient::receive(struct Datagram datagram, size_t len)
+{
+  write(tty_file, datagram.message, len - DATAGRAM_HEADER);
+};
+

@@ -21,6 +21,8 @@ class SerialClient : public DisasterClient
     bool init();
     void loop();
 
+    void receive(struct Datagram datagram, size_t len);
+
   private:
     std::string portname;
     int tty_file;

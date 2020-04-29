@@ -7,11 +7,16 @@
 #include <websocketpp/server.hpp>
 #include <string>
 
+// server
 #include "server/DisasterRadio.h"
+
 // client
 #include "client/WebSocketppClient.h"
 #include "client/LoRaClient.h"
 #include "client/SerialClient.h"
+
+// middleware
+#include "middleware/Console.h"
 
 int nodeID = 1;
 std::string root = "../routers/static/";
@@ -70,7 +75,8 @@ void setupSerial()
   else{
     Serial.printf(" --> Serial initialized, no device connected\r\n");
   }
-  radio->connect(serial_client);
+  radio->connect(new Console())
+    ->connect(serial_client);
 }
 
 void setupWebSocket(){
