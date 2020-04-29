@@ -11,6 +11,7 @@ CPP_FILES=$(LL2LIB)/Layer1_Sim.cpp \
   ./server/DisasterRadio.cpp \
   ./client/WebSocketppClient.cpp \
   ./client/LoRaClient.cpp \
+  ./client/SerialClient.cpp \
   main.cpp
 
 firmware: main.cpp

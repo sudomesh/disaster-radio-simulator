@@ -5,11 +5,13 @@
 #include <LoRaLayer2.h>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
+#include <string>
 
 #include "server/DisasterRadio.h"
 // client
 #include "client/WebSocketppClient.h"
 #include "client/LoRaClient.h"
+#include "client/SerialClient.h"
 
 int nodeID = 1;
 std::string root = "../routers/static/";
@@ -41,12 +43,34 @@ void setupLoRa()
   LoRaClient *lora_client = new LoRaClient();
   if (lora_client->init())
   {
-    //Serial.printf(" --> LoRa address: %s\n", nodeAddress);
+    Serial.printf(" --> init succeeded...");
+    nodeID = Layer1.nodeID();
+    Serial.printf("node ID: %i\r\n", nodeID);
     radio->connect(lora_client);
     //loraInitialized = true;
     return;
   }
   Serial.printf(" --> Failed to initialize LoRa\r\n");
+}
+
+void setupSerial()
+{
+  Serial.printf("* Initializing Serial...\r\n");
+
+  // append nodeID to tty port (used string out of convience)
+  std::string port = "./tty/N";
+  std::string number = std::to_string(nodeID);
+  std::string portname = port + number;
+
+  Serial.printf(" --> connect to %s\r\n", portname.c_str());
+  SerialClient *serial_client = new SerialClient(portname);
+  if(serial_client->init()){
+    Serial.printf(" --> Serial initialized and connected\r\n");
+  }
+  else{
+    Serial.printf(" --> Serial initialized, no device connected\r\n");
+  }
+  radio->connect(serial_client);
 }
 
 void setupWebSocket(){
@@ -64,6 +88,7 @@ int setup(){
 
     srand(time(NULL) + getpid());
     setupLoRa();
+    setupSerial();
     setupWebSocket();
     chance=rand()%15;
     if(chance == 1){

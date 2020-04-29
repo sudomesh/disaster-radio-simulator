@@ -30,13 +30,15 @@ make firmware
 
 ## Test the firmware
 
-Download the [latest release](https://github.com/sudomesh/disaster-radio/releases) of disaster.radio firmware. Unzip the download and copy the contents of the `web/static/` directory to `routers/static/`,
-
 Start a single disaster.radio node by running,
 ```
 ./firmware
 ```
-Next open a browser and navigate to http://localhost:8080 and you should be greeted with the disaster.radio chat app. Trying entering a nickname and make sure `~<nickname> joined the channel` is printed.
+Connect to your virtual node by creating a PTY using socat, like so
+```
+socat PTY,link=./tty/N1,raw,echo=0 -
+```
+where `N1` corresponds to the ID of the node you wish to connect to.
 
 ## Running the simulator
 
