@@ -7,6 +7,7 @@
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 #include <iostream>
+#include <thread>
 #include <fstream>
 #include <set>
 #include <streambuf>
@@ -22,17 +23,20 @@ typedef websocketpp::connection_hdl connection_hdl;
 class WebSocketppClient : public DisasterClient
 {
 
-    WebSocketppServer *ws_server;
 
 public:
-    WebSocketppClient(WebSocketppServer *wss);
+    WebSocketppClient();
     
     void receive(struct Datagram datagram, size_t len);
     void on_message(connection_hdl hdl, WebSocketppServer::message_ptr msg);
-    void on_http( WebSocketppServer::connection_ptr con);
-    void handleDisconnect();
+    void on_http(connection_hdl hdl, std::string root);
+    void loop();
 
-    static void startServer(WebSocketppServer *ws, void (*callback)(WebSocketppClient *));
+    void startServer(uint16_t port, std::string root);
+  
+private:
+    WebSocketppServer ws;
+
 };
 
 #endif

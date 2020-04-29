@@ -1,12 +1,13 @@
 #include "WebSocketppClient.h"
+#include "Layer1.h"
 
 #include <map>
 
-typedef std::map<connection_hdl, WebSocketppClient *, std::owner_less<connection_hdl>> connection_map;
+typedef std::set<connection_hdl, std::owner_less<connection_hdl>> connection_map;
 connection_map client_map;
 
-WebSocketppClient::WebSocketppClient(WebSocketppServer *wss)
-  : ws_server{wss} {};
+WebSocketppClient::WebSocketppClient(){}//WebSocketppServer *wss)
+//  : ws_server{wss} {};
 
 void WebSocketppClient::receive(struct Datagram datagram, size_t len)
 {
@@ -22,21 +23,21 @@ void WebSocketppClient::receive(struct Datagram datagram, size_t len)
     // iterate over client map to send message to all connected clients
     connection_map::iterator it;
     for (it = client_map.begin(); it != client_map.end(); ++it) {
-      ws_server->send(it->first, val.str(), websocketpp::frame::opcode::text);
+      ws.send(*it, val.str(), websocketpp::frame::opcode::text);
     }
 }
 
 void WebSocketppClient::on_message(connection_hdl hdl, WebSocketppServer::message_ptr msg)
 {
   // Upgrade connection handle to full connection pointer
-  WebSocketppServer::connection_ptr con = ws_server->get_con_from_hdl(hdl);
+  WebSocketppServer::connection_ptr con = ws.get_con_from_hdl(hdl);
 
   std::string message = msg->get_payload(); 
 
   // Send ack to ws client
   std::stringstream val;
   val << message.substr(0,2) << "!";
-  ws_server->send(con, val.str(), websocketpp::frame::opcode::text);
+  ws.send(con, val.str(), websocketpp::frame::opcode::text);
 
   // Send message to other connected layer 3 clients
   struct Datagram datagram = {0xff, 0xff, 0xff, 0xff};
@@ -45,19 +46,20 @@ void WebSocketppClient::on_message(connection_hdl hdl, WebSocketppServer::messag
   server->transmit(this, datagram, DATAGRAM_HEADER+message.length());
 }
 
-void WebSocketppClient::on_http(WebSocketppServer::connection_ptr con)
+void WebSocketppClient::on_http(connection_hdl hdl, std::string root)
 {
     // folder where static website is stored
-    std::string docroot = "./static/";
+    //std::string docroot = "./static/";
+    WebSocketppServer::connection_ptr con = ws.get_con_from_hdl(hdl);
     std::ifstream file;
     std::string filename = con->get_resource();
     std::string response;
 
     // Open index.htm when "/" is requested
     if (filename == "/") {
-        filename = docroot+"index.htm";
+        filename = root+"index.htm";
     } else {
-        filename = docroot+filename.substr(1);
+        filename = root+filename.substr(1);
     }
     
     //Open requested file
@@ -87,49 +89,49 @@ void WebSocketppClient::on_http(WebSocketppServer::connection_ptr con)
     con->set_status(websocketpp::http::status_code::ok);
 }
 
-void WebSocketppClient::handleDisconnect()
+void WebSocketppClient::loop()
 {
-    server->disconnect(this);
+  ws.poll();
 }
 
-void WebSocketppClient::startServer(WebSocketppServer *ws, void (*callback)(WebSocketppClient *))
+void WebSocketppClient::startServer(uint16_t port, std::string root)
 {
-    uint16_t port = 8080;
-    ws->clear_access_channels(websocketpp::log::alevel::all);
-    boost::asio::io_service ios;
-    ws->set_reuse_addr(true);
-    ws->set_open_handler(
-        [&ws, callback](connection_hdl hdl){
-            WebSocketppClient *ws_client = new WebSocketppClient(ws);
-            client_map[hdl] = ws_client;
-            callback(ws_client);
-        });
-    ws->set_close_handler(
+    ws.clear_access_channels(websocketpp::log::alevel::all);
+    ws.set_reuse_addr(true);
+    ws.set_open_handler(
         [](connection_hdl hdl){
-            WebSocketppClient *ws_client = client_map[hdl];
-            ws_client->handleDisconnect();
+            //WebSocketppClient *ws_client = new WebSocketppClient(ws);
+            client_map.insert(hdl);// = ws_client;
+            //callback(ws_client);
+        });
+    ws.set_close_handler(
+        [](connection_hdl hdl){
+            //WebSocketppClient *ws_client = client_map[hdl];
+            //ws_client->handleDisconnect();
             client_map.erase(hdl);
         });
-    ws->set_http_handler(
-        [&ws](connection_hdl hdl){
-            WebSocketppClient *ws_client = client_map[hdl];
-            WebSocketppServer::connection_ptr con = ws->get_con_from_hdl(hdl);
-            ws_client->on_http(con);
+    ws.set_http_handler(
+        [this, root](connection_hdl hdl){
+            //WebSocketppClient *ws_client = client_map[hdl];
+            //WebSocketppServer::connection_ptr con = ws->get_con_from_hdl(hdl);
+            on_http(hdl, root);
         });
-    ws->set_message_handler(
-        [](connection_hdl hdl, WebSocketppServer::message_ptr msg){
-            WebSocketppClient *ws_client = client_map[hdl];
-            ws_client->on_message(hdl, msg);
+    ws.set_message_handler(
+        [this](connection_hdl hdl, WebSocketppServer::message_ptr msg){
+            //WebSocketppClient *ws_client = client_map[hdl];
+            on_message(hdl, msg);
         });
-    ws->set_fail_handler(
+    ws.set_fail_handler(
         [](connection_hdl hdl){
-            //std::cout << "fail: " << hdl.lock() << std::endl;
+            std::cout << "fail: " << hdl.lock() << std::endl;
         });
-    ws->init_asio(&ios);
+
+    boost::asio::io_service ios;
+    ws.init_asio(&ios);
     // listen on specified port
-    ws->listen(port);
+    ws.listen(port);
     // Start the server accept loop
-    ws->start_accept();
+    ws.start_accept();
     // Start the ASIO io_service run loop
-    ws->run();
+    //ws.run(); // is blocking, CANNOT USE.
 }

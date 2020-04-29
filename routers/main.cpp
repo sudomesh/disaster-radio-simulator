@@ -11,7 +11,8 @@
 #include "client/WebSocketppClient.h"
 #include "client/LoRaClient.h"
 
-WebSocketppServer ws_server;
+int nodeID = 1;
+std::string root = "../routers/static/";
 
 DisasterRadio *radio = new DisasterRadio();
 
@@ -49,10 +50,14 @@ void setupLoRa()
 }
 
 void setupWebSocket(){
+  Serial.printf("* WebSocketpp not initialized...\r\n");
+  /* TODO: Websocketpp polling cause seg fault inside of loop?
+  uint16_t port = 8000 + nodeID;
   Serial.printf("* Initializing WebSocketpp...\r\n");
-  WebSocketppClient::startServer(&ws_server, [](WebSocketppClient *ws_client){
-    radio->connect(ws_client);
-  });
+  WebSocketppClient *ws_client = new WebSocketppClient();
+  ws_client->startServer(port, root);
+  radio->connect(ws_client);
+  */
 }
 
 int setup(){
