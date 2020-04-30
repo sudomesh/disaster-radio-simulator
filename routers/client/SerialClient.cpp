@@ -70,6 +70,13 @@ void SerialClient::loop(){
       memcpy(datagram.destination, LL2.broadcastAddr(), ADDR_LENGTH);
       datagram.type = 'c';
       memcpy(datagram.message, buffer, length);
+      #ifdef DEBUG
+      Serial.printf("Serial::loop(): datagram.message = ");
+      for(int i = 0; i < length; i++){
+        Serial.printf("%c", datagram.message[i]);
+      }
+      Serial.printf("\r\n");
+      #endif
       server->transmit(this, datagram, length + DATAGRAM_HEADER);
     }
   }

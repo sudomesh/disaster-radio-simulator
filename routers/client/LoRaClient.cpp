@@ -13,16 +13,25 @@ void LoRaClient::loop()
     struct Packet packet = LL2.readData();
     if (packet.totalLength > HEADER_LENGTH)
     {
-        struct Datagram datagram;
-		memset(datagram.message, 0, DATAGRAM_MESSAGE);
-        size_t len = packet.totalLength - HEADER_LENGTH;
-        // parse out datagram
-        memcpy(&datagram, &packet.datagram, len);
-        server->transmit(this, packet.datagram, len);
+        #ifdef DEBUG
+        Serial.printf("LoRaCient::loop(): packet.datagram message = ");
+        for(int i = 0; i < packet.totalLength-HEADER_LENGTH-DATAGRAM_HEADER; i++){
+          Serial.printf("%c", packet.datagram.message[i]);
+        }
+        Serial.printf("\r\n");
+        #endif
+        server->transmit(this, packet.datagram, packet.totalLength - HEADER_LENGTH);
     }
 }
 
 void LoRaClient::receive(struct Datagram datagram, size_t len)
 {
+    #ifdef DEBUG
+    Serial.printf("LoRaCient::receive(): datagram message = ");
+    for(int i = 0; i < len-DATAGRAM_HEADER; i++){
+      Serial.printf("%c", datagram.message[i]);
+    }
+    Serial.printf("\r\n");
+    #endif
     LL2.writeData(datagram, len);
 }

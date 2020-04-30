@@ -96,20 +96,16 @@ int setup(){
     setupLoRa();
     setupSerial();
     setupWebSocket();
-    chance=rand()%15;
-    if(chance == 1){
-        Serial.printf(" will transmit");
-    }
-    Serial.printf("\n");
-
     // random blocking wait at boot
     int wait = rand()%maxRandomDelay();
-    Serial.printf("waiting %d s\n", wait);
-    sleep(wait);
+    //Serial.printf("waiting %d s\n", wait);
+    //sleep(wait);
     return 0;
 }
 
 int loop(){
     radio->loop();
-    Layer1.nsleep(0, 1000000*Layer1.simulationTime(1));
+    // nsleep sets time out for reading packet from STDIN
+    // setting this helps always read packet correctly
+    nsleep(0, 100000*Layer1.simulationTime(1));
 }
