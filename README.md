@@ -8,27 +8,39 @@ This simulator comes in three parts,
 * `simulator` - a node js script that creates a virtual network of disaster radio routers
 * `visualizer` - a browser-based "visual simulator" that provides a visual representation of the simulated network
 
-## Compile the firmware
 
-First install dependencies for compiling the C++ firmware that is used by the simulator,
+The default protocol used in this simulator is [LoRaLayer2](https://github.com/sudomesh/LoRaLayer2), find more details about the protocol on [our wiki](https://github.com/sudomesh/disaster-radio/wiki/Protocol).
 
+## Prerequisites
+It is best to run this simulator on an Ubuntu 18.04 machine. It is unknown how it will perform on other operating systems, though it should be possible to run it on any given machine.  
+
+Install the dependencies for compiling the firmware,
 ```
 sudo apt update
 sudo apt install build-essential libwebsocketpp-dev libboost-dev
 ```
+You will need version 7.10 of Node.js to run the simulator script and build the web app. it is recommended that you use something like [nvm](https://github.com/nvm-sh/nvm) to install the correct version of Node.js.
 
-Next, get the latest LoRaLayer2 library by running `fetch_deps.sh`,  
+## Router Firmware
+
+### Compile the firmware
+
+From the root of the repository, navigate to the routers directory, and get fetch the dependencies (i.e. the latest LoRaLayer2 library),  
 ```
 cd routers
 ./fetch_deps.sh
 ```
-
 Then compile the firmware with,
 ```
 make firmware
 ```
+After making any changes to the firmware source files, it is recommended you recompile by running,
+```
+make clean
+make firmware
+```
 
-## Test the firmware
+### Test the firmware
 
 Start a single disaster.radio node by running,
 ```
@@ -38,39 +50,29 @@ Connect to your virtual node by creating a PTY using socat, like so
 ```
 socat PTY,link=./tty/N1,raw,echo=0 -
 ```
-where `N1` corresponds to the ID of the node you wish to connect to.
+`N1` corresponds to the ID of the node you wish to connect to.
 
-## Running the simulator
+## Simulator Script
 
-Once the firmware has been compiled and test, you can run the simulator.
-
+Once the firmware has been compiled and test, you can run the simulator. From the root of the repository,
 ```
-cd ..
+cd simulator
 npm install
 ./simulator.js
 ```
+This should produce a large amount of output showing that all of your nodes have been started and tell you the tty file to which you can connect.
 
-You can now play around with the network's configuration by modifying the options in `simulator.js`.   
+You can now play around with the network's configuration by modifying the options in `simulator.js`. The structure of the network can be changed by modifiying the json files in `simulator/net_structures/`  
 
-The router firmware can be modified through the `routers/firmware.c` file, you'll need recompile it before re-running the simulator.
+The router firmware can be modified in the `routers/` directory, you must recompile it before re-running the simulator.  
 
-The default behavior is for the nodes to learn about their neighbors and for ~100s and then one node, chosen at random, may begin routing packets to other nodes.
+## Visualizer Web App
 
-If you'd like to know more about the default protocol being used by disaster.radio nodes, read [our wiki](https://github.com/sudomesh/disaster-radio/wiki/Protocol).
-
-# Visual simulator
-
-First install javascript dependencies, if you have not already,
+From the root of the repository, navigate into the visualizer directory, install javascript dependencies, build and start the web app.
 ```
+cd visualizer 
 npm install
-```
-Then, build the script,
-```
 npm run build
-```
-
-And, finally, start the server,
-```
 npm start
 ```
 Be sure to also start `simulator.js` if you haven't already (see above), and open a browser to http://localhost:8000.
