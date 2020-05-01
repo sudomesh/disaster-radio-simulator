@@ -1,3 +1,6 @@
+#ifndef SERIALCLIENT_H
+#define SERIALCLIENT_H
+
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h> 
@@ -8,7 +11,9 @@
 #include "../DisasterClient.h"
 #include "../DisasterServer.h"
 
-#include "Layer1.h"
+#ifdef SIM
+#include "../simulator.h"
+#endif
 
 class SerialClient : public DisasterClient
 {
@@ -28,3 +33,4 @@ class SerialClient : public DisasterClient
     int tty_file;
     bool serialInitialized;
 };
+#endif

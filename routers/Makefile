@@ -13,6 +13,7 @@ CPP_FILES=$(LL2LIB)/Layer1_Sim.cpp \
   ./client/LoRaClient.cpp \
   ./client/SerialClient.cpp \
   ./middleware/Console.cpp \
+  simulator.c \
   main.cpp
 
 firmware: main.cpp

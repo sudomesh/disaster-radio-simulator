@@ -4,6 +4,10 @@
 #include "../DisasterClient.h"
 #include "../DisasterServer.h"
 
+#ifdef SIM
+#include "../simulator.h"
+#endif
+
 #include <Layer1.h>
 #include <LoRaLayer2.h>
 

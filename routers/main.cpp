@@ -1,11 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include "simulator.h"
 #include <Layer1.h>
 #include <LoRaLayer2.h>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
-#include <string>
 
 // server
 #include "server/DisasterRadio.h"
@@ -108,4 +105,31 @@ int loop(){
     // nsleep sets time out for reading packet from STDIN
     // setting this helps always read packet correctly
     nsleep(0, 100000*Layer1.simulationTime(1));
+}
+
+int main(int argc, char **argv) {
+    int opt;
+    // handle getopt arguments
+    while ((opt = getopt(argc, argv, "t:a:n:")) != -1) {
+        switch (opt) {
+            case 't':
+                Layer1.setTimeDistortion(strtod(optarg, NULL));
+                break;
+            case 'a':
+                LL2.setLocalAddress(optarg);
+                break;
+            case 'n':
+                Layer1.setNodeID(atoi(optarg));
+                break;
+            default:
+                perror("Bad args\n");
+                return 1;
+        }
+    }
+    //Enter main program
+    int ret = simulator_setup_loop();
+    // from simulator.c
+    // interfaces with simulator.js via STDOUT/STDIN
+    // executes setup and loop functions
+    return ret;
 }
