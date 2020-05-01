@@ -2,6 +2,7 @@
 all: firmware
 
 LL2LIB=./libs/LoRaLayer2/src
+DEBUGLIB = ./libs/backward-cpp
 
 FLAGS=-pthread -DSIM -DBOOST_ERROR_CODE_HEADER_ONLY -DBOOST_SYSTEM_NO_DEPRECATED
 
@@ -17,7 +18,7 @@ CPP_FILES=$(LL2LIB)/Layer1_Sim.cpp \
   main.cpp
 
 firmware: main.cpp
-	g++ -g -I$(LL2LIB) $(FLAGS) -o firmware $(CPP_FILES)
+	g++ -g -I$(LL2LIB) -I$(DEBUGLIB) $(FLAGS) -o firmware $(CPP_FILES)
 
 clean:
 	rm -f firmware 
