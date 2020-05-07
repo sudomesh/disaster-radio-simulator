@@ -5,41 +5,10 @@ var uuid = require('uuid').v4;
 var xtend = require('xtend');
 var Radio = require('./radio.js');
 
-// parse packets from incoming data
-function parsePackets(data) {
-  if(!data) return;
-  var packets = [];
-  var len;
-  var got = 0;
-
-  while(got < data.length) {
-  
-    len = data.readUInt8(got);
-
-    if(len < 1) {
-      console.error("Got bad packet from external router!");
-      process.exit(1);
-    }
-    if(len > data.length - got - 1) {
-      return {
-        packets: packets,
-        partial: data.slice(got)
-      }
-    }
-
-
-    packets.push(data.slice(got + 1, got + len + 1));
-    got += len;
-  }
-  return {
-    packets: packets
-  }
-}
-
 function randomMac(){
   var mac = '';
   var hexDigits = "0123456789abcdef";
-  for (var i = 0; i < 12  ; i++){
+  for (var i = 0; i < 8  ; i++){
     mac+=hexDigits.charAt(Math.round(Math.random() * 15));
   }
   return mac;
@@ -72,42 +41,32 @@ function Node(opts, radioOpts, routerOpts) {
       this.extRouter = false;
     } else if(typeof this.opts.router === 'string') {
 
+      // Spawn router with cmd pointing to firmware c file and args providing the initialization values
       var args = this.opts.router.split(/\s+/);
       var cmd = args[0];
       args = args.slice(1);
       args = args.concat(['-t', this.network.opts.timeDistortion, '-a', this.mac, '-n', this.id ]);
-
       this.router = spawn(cmd, args);
 
+      // Handle router on close event
       this.router.on('close', function(code) {
         console.error('[node ' + this.id + ' router]', "exited with exit code", code);
         this.router = null;
       }.bind(this));
 
+      // Handle router on data event (i.e. transmitting a message from router)
       this.stdoutBuffer = new Buffer('');
-
       this.router.stdout.on('data', function(data) {
         this.stdoutBuffer = Buffer.concat([this.stdoutBuffer, data])
 
-        var o = parsePackets(this.stdoutBuffer);
-
-        /*
-        if(o.partial) {
-          console.error('[node ' + this.id + ' router]', "partial");
-          this.stdoutBuffer = o.partial;
-        } else {
-          console.error('[node ' + this.id + ' router]', "not partial");
-          this.stdoutBuffer = new Buffer('');
+        // Slice off the first byte of buffer, it contains the length of the packet
+        var len = this.stdoutBuffer.readUInt8(0);
+        var packet = this.stdoutBuffer.slice(1, len+1);
+        if(this.opts.debug){
+          process.stderr.write('[node ' + this.id + ' router] stdout.on(data): ' + packet + '\n');
         }
-        */
         this.stdoutBuffer = new Buffer('');
-
-        async.eachSeries(o.packets, this.tx.bind(this), function(err) {
-          if(err) console.error(err);
-
-          // TODO handle error better
-        });
-
+        this.tx(packet);
       }.bind(this));
 
       if(this.id == this.opts.monitorNode || this.opts.monitorNode == 0){
@@ -144,7 +103,7 @@ function Node(opts, radioOpts, routerOpts) {
 
   this.txQueue = [];
 
-
+  // Transmit packet to neighboring nodes
   this.tx = function(data, cb) {
     if(!data) {
       if(!this.txQueue.length) return;
