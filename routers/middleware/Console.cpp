@@ -6,19 +6,24 @@
 #include <Layer1.h>
 #include <LoRaLayer2.h>
 //#include "settings/settings.h"
-//#include "utils/utils.h"
+#include "../utils/utils.h"
+#include "../simulator.h"
 
 #include <vector>
 
 Console::Console(){};
 
-void Console::print(const char* message)
+void Console::printf(const char* format, ...)
 {
+
+  va_list args;
+  va_start(args, format);
   struct Datagram response;
   memcpy(response.destination, LL2.loopbackAddr(), ADDR_LENGTH);
   response.type = 'i';
-  int msgLen = sprintf((char *)response.message, message);
-  client->receive(response, msgLen + DATAGRAM_HEADER);
+  size_t len = vsprintf((char *)response.message, format, args);
+  client->receive(response, len + DATAGRAM_HEADER);
+  va_end(args);
 }
 
 void Console::setup()
@@ -63,7 +68,7 @@ void Console::processLine(char *message, size_t len)
 
     if (strncmp(&args[0][1], "help", 4) == 0)
     {
-      print("Commands: /help /join /nick /raw /lora /set /restart\r\n");
+      printf("Commands: /help /join /nick /raw /lora /set /restart\r\n");
       #ifdef DEBUG_OUT
       Serial.printf("Console::processLine help result %s\r\n", (char *)response.message);
       #endif
@@ -138,14 +143,13 @@ void Console::processLine(char *message, size_t len)
     */
     else if ((strncmp(&args[0][1], "lora", 4) == 0))
     {
-      print("Local address: ");
+
       char str[ADDR_LENGTH*2 + 1] = {'\0'};
-      //hexcpy(str, LL2.localAddress(), ADDR_LENGTH);
-      //print(str);
-      print("\r\n");
       char str2[256] = {'\0'}; //TODO: need to check size of routing table to allocate correct amount of memory
+      hexToChar(str, LL2.localAddress(), ADDR_LENGTH);
+      printf("Local address: %s\r\n", str);
       LL2.getRoutingTable(str2);
-      print(str2);
+      printf("%s", str2);
     }
     else
     {
@@ -167,14 +171,25 @@ void Console::processLine(char *message, size_t len)
     #endif
   }
   */
+  else if(msgBuff[0] == '@')
+  {
+    // "direct"/routed message
+    uint8_t destination[ADDR_LENGTH];
+    charToHex(destination, msgBuff+1, ADDR_LENGTH);
+    msgLen = sprintf((char *)response.message, "%s", msgBuff);
+    memcpy(response.destination, destination, ADDR_LENGTH);
+    response.type = 'c';
+    server->transmit(this, response, msgLen + DATAGRAM_HEADER);
+  }
   else
   {
-    msgLen = sprintf((char *)response.message, "00c|%s", msgBuff);
+    // broadcast message
+    msgLen = sprintf((char *)response.message, "%s", msgBuff);
     memcpy(response.destination, LL2.broadcastAddr(), ADDR_LENGTH);
     response.type = 'c';
     server->transmit(this, response, msgLen + DATAGRAM_HEADER);
-    memcpy(response.message, &response.message[4], msgLen - 4);
-    response.message[msgLen - 4] = '\n';
+    memcpy(response.message, &response.message, msgLen);
+    response.message[msgLen] = '\n';
     #ifdef DEBUG_OUT
     Serial.printf("Console message =>%s<\r\n", &response.message[4]);
     #endif
@@ -183,11 +198,11 @@ void Console::processLine(char *message, size_t len)
 
 void Console::printBanner()
 {
-  print("     ___              __                            ___    \r\n");
-  print(" ___/ (_)__ ___ ____ / /____ ____      _______ ____/ (_)__ \r\n");
-  print("/ _  / (_-</ _ `(_-</ __/ -_) __/ _   / __/ _ `/ _  / / _ \\\r\n");
-  print("\\_,_/_/___/\\_,_/___/\\__/\\__/_/   (_) /_/  \\_,_/\\_,_/_/\\___/\r\n");
-  print("v1.0.0-rc.1\r\n");
+  printf("     ___              __                            ___    \r\n");
+  printf(" ___/ (_)__ ___ ____ / /____ ____      _______ ____/ (_)__ \r\n");
+  printf("/ _  / (_-</ _ `(_-</ __/ -_) __/ _   / __/ _ `/ _  / / _ \\\r\n");
+  printf("\\_,_/_/___/\\_,_/___/\\__/\\__/_/   (_) /_/  \\_,_/\\_,_/_/\\___/\r\n");
+  printf("v1.0.0-rc.1\r\n");
 
   /*
   if(Layer1.loraInitialized()){
@@ -196,12 +211,11 @@ void Console::printBanner()
     print("WARNING: LoRa transceiver not found!\r\n");
   }
   */
-  print("Local address of your node is ");
-  char str[ADDR_LENGTH*2 + 1] = {'\0'};
-  //hexcpy(str, LL2.localAddress(), ADDR_LENGTH);
-  //print(str);
-  print("\r\n");
-  print("Type '/join NICKNAME' to join the chat, or '/help' for more commands.\r\n");
+  char *str = (char*)malloc(ADDR_LENGTH*2 + 1);// = {'\0'};
+  hexToChar(str, LL2.localAddress(), ADDR_LENGTH);
+  printf("Local address of your node is %s\r\n", str);
+  printf("Type '/join NICKNAME' to join the chat, or '/help' for more commands.\r\n");
+  free(str);
 }
 
 void Console::printPrompt()
@@ -216,7 +230,7 @@ void Console::printPrompt()
   else
   {
   */
-    print("< > ");
+    printf("< > ");
   //}
 }
 
@@ -246,23 +260,16 @@ void Console::transmit(DisasterClient *client, struct Datagram datagram, size_t 
 
 void Console::receive(struct Datagram datagram, size_t len)
 {
-  int msgSize = len - DATAGRAM_HEADER;
-
-  if ((datagram.message[2] == 'c') && (datagram.message[3] == '|'))
+  #ifdef DEBUG_OUT
+  Serial.printf("CONSOLE::receive raw data with len %d type %c\n", msgSize, datagram.type);
+  for (int idx = 0; idx < msgSize; idx++)
   {
-    #ifdef DEBUG_OUT
-    Serial.printf("CONSOLE::receive raw data with len %d type %c\n", msgSize, datagram.type);
-    for (int idx = 0; idx < msgSize; idx++)
-    {
-      Serial.printf("%02X ", datagram.message[idx]);
-    }
-    Serial.println("");
-    #endif
-
-    memcpy(datagram.message, &datagram.message[4], msgSize - 4);
-    msgSize -= 4;
-    datagram.message[msgSize] = '\n';
-    msgSize += 1;
-    client->receive(datagram, msgSize + DATAGRAM_HEADER);
+    Serial.printf("%02X ", datagram.message[idx]);
   }
+  Serial.println("");
+  #endif
+
+  printf("\r\n");
+  client->receive(datagram, len);
+  printPrompt();
 }

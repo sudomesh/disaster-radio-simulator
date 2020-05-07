@@ -1,3 +1,4 @@
+//#define BACKWARD_HAS_DW 1
 #include "simulator.h"
 #include <backward.cpp>
 #include <Layer1.h>

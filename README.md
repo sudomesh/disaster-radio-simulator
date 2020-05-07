@@ -17,7 +17,7 @@ It is best to run this simulator on an Ubuntu 18.04 machine. It is unknown how i
 Install the dependencies for compiling the firmware,
 ```
 sudo apt update
-sudo apt install build-essential libwebsocketpp-dev libboost-dev
+sudo apt install build-essential libwebsocketpp-dev libboost-dev libdw-dev
 ```
 You will need version 7.10 of Node.js to run the simulator script and build the web app. it is recommended that you use something like [nvm](https://github.com/nvm-sh/nvm) to install the correct version of Node.js.
 

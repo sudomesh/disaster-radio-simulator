@@ -15,7 +15,7 @@ public:
     Console();//DisasterHistory *h = NULL)
         //: DisasterMiddleware(), history(h){};
 
-    void print(const char* message);
+    void printf(const char* format, ...);
 
     void setup();
 
