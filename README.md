@@ -81,6 +81,24 @@ You can develop the server using,
 ```
 npm run watch
 ```
+## Using the Simulator
+To send messages from one simulated node to another, you need to access the nodes over a virtual tty device using socat.  
+From the root of the repository, navigate to the simulator directory and create the virtual tty device,  
+```
+cd simulator
+socat PTY,link=./tty/N0,raw,echo=0 -
+```
+`N0` corresponds to the ID of the node you wish to connect to. The node IDs can be found in the visualizer or in the net structures json files.  
+
+After pressing the Enter key once, you should be greeted by a disaster radio banner.  
+You can then open another terminal and again from the simulator directory create another virtual tty device for a different node.  
+```
+socat PTY,link=./tty/N1,raw,echo=0 -
+```
+This can be done for as many node as you would like to observe. Ideally, they should behave just as though you were conencted via serial or telnet to a real disaster radio node.  
+
+Send broadcast messages from the any of the socat instances you have opened by typing your message an pressing enter. You can send a direct/routed message to a specific node by starting the message with `@<node address>`, node addresses can be copied from the routing table, which can be viewed by typing `/lora`. Watch the packet get forwarded by each node in the route in the visualizer. 
+
 # ToDo
 * expand visual interface (e.g. choose which nodes send/receive packets, inspect metrics and routing tables)
 * fix various bugs, https://github.com/sudomesh/disaster-radio-simulator/issues
