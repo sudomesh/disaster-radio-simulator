@@ -97,8 +97,8 @@ int setup(){
     setupWebSocket();
     // random blocking wait at boot
     int wait = rand()%maxRandomDelay();
-    //Serial.printf("waiting %d s\n", wait);
-    //sleep(wait);
+    Serial.printf("[node %d] waiting %d s\n", nodeID, wait);
+    sleep(wait);
     return 0;
 }
 
