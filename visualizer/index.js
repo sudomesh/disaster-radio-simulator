@@ -261,7 +261,7 @@ function transmitPacket({ source_id, target_ids, time, data }) {
   // render route lines if it's a chat packet
   let parsedPacket = util.parsePacket(data.data);
   if (parsedPacket.typeReadable === 'chat') {
-    let nextHopNode = model.nodes.find((n) => n.mac === parsedPacket.nextHopReadable);
+    let nextHopNode = model.nodes.find((n) => n.mac === parsedPacket.receiverReadable);
     routesGroup.append('line')
       .attr('x1', sourceNode.x)
       .attr('y1', sourceNode.y)
@@ -280,17 +280,18 @@ function transmitPacket({ source_id, target_ids, time, data }) {
           .attr('opacity', 0)
           .remove();
   }
- 
-  // update UI route table if routing packet
-  if (parsedPacket.typeReadable === 'routing') {
+
+  // update UI route table if packet is addressed to routing multicast address
+  if (parsedPacket.receiverReadable === 'afffffff') {
     var length = parsedPacket.totalLength;
-    var routes = parsedPacket.data;
+    // concat entire datagram, routing table packets do not use destination or type
+    var routes = parsedPacket.destination.concat(parsedPacket.type, parsedPacket.data);
     var id, mac, hops, metric;
-    for(i = 0; i < length*(1/8); i++ ){
+    for(i = 0; i < length*(1/6); i++ ){
         id = 0;
-        mac = routes.slice(i*8, (i*8)+6).map(util.parseHexPair).join('');
-        hops = routes[(i*8)+6];
-        metric = routes[(i*8)+7];
+        mac = routes.slice(i*6, (i*6)+4).map(util.parseHexPair).join('');
+        hops = routes[(i*6)+4];
+        metric = routes[(i*6)+5];
         for(j = 0; j < model.nodes.length; j++){
             if(model.nodes[j].mac == mac){
                 id = model.nodes[j].id;

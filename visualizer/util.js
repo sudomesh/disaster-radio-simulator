@@ -2,14 +2,17 @@ function parsePacket(buffer) {
   return {
     ttl: buffer[0],
     totalLength: buffer[1],
-    source: buffer.slice(2,8),
-    destination: buffer.slice(8,14),
-    sequence: buffer[14],
-    type: buffer[15],
-    typeReadable: packetTypes[String.fromCharCode(buffer[15])],
-    nextHop: buffer.slice(16, 22),
-    nextHopReadable: buffer.slice(16, 22).map(parseHexPair).join(''),
-    data: buffer.slice(16)
+    sender: buffer.slice(2,6),
+    receiver: buffer.slice(6,10),
+    sequence: buffer[10],
+    source: buffer.slice(11,15),
+    hopCount: buffer[15],
+    metric: buffer[16],
+    destination: buffer.slice(17,21),
+    type: buffer[21],
+    typeReadable: packetTypes[String.fromCharCode(buffer[21])],
+    receiverReadable: buffer.slice(6, 10).map(parseHexPair).join(''),
+    data: buffer.slice(22)
   };
 }
 
