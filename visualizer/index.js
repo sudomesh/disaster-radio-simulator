@@ -66,20 +66,23 @@ let model = window.model = {
 };
 
 let svg = d3.select('#plot');
-let labelsGroup = svg.append('g')
-  .attr('class', 'labels');
-let receiveGroup = svg.append('g')
-  .attr('class', 'receive');
-let nodesGroup = svg.append('g')
-  .attr('class', 'nodes');
-let routesGroup = svg.append('g')
-  .attr('class', 'routes');
-let packetsGroup = svg.append('g')
-  .attr('class', 'packets');
+
+// Bottom-most Layer
 let broadcastGroup = svg.append('g')
   .attr('class', 'broadcast');
+let routesGroup = svg.append('g')
+  .attr('class', 'routes');
+let nodesGroup = svg.append('g')
+  .attr('class', 'nodes');
+let receiveGroup = svg.append('g')
+  .attr('class', 'receive');
+let packetsGroup = svg.append('g')
+  .attr('class', 'packets');
+let labelsGroup = svg.append('g')
+  .attr('class', 'labels');
 let tooltipGroup = svg.append('g')
   .attr('class', 'tooltip');
+// Top-most Layer
 
 function getViewMode() {
   return model.mode;
@@ -300,7 +303,7 @@ function transmitPacket({ source_id, target_ids, time, data }) {
       .attr('cx', nextHopNode.x)
       .attr('cy', nextHopNode.y)
       .attr('r', 40)
-      .style('fill', 'rgba(255, 0, 0, 1)')
+      .style('fill', 'rgba(255, 255, 0, 1)')
       .attr('opacity', 0)
       .transition()
         .duration(getAnimationTime(time))
