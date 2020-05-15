@@ -12,6 +12,7 @@ function parsePacket(buffer) {
     type: buffer[21],
     typeReadable: packetTypes[String.fromCharCode(buffer[21])],
     receiverReadable: buffer.slice(6, 10).map(parseHexPair).join(''),
+    destinationReadable: buffer.slice(17, 21).map(parseHexPair).join(''),
     data: buffer.slice(22)
   };
 }

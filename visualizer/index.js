@@ -59,18 +59,25 @@ let model = window.model = {
   modes: ['emoji', 'packet'],
   mode: 'emoji',
   labels: ['none', 'id', 'mac'],
-  label: 'mac'
+  label: 'mac',
+  broadcasts: ['off', 'on'],
+  broadcast: 'on'
+
 };
 
 let svg = d3.select('#plot');
 let labelsGroup = svg.append('g')
   .attr('class', 'labels');
+let receiveGroup = svg.append('g')
+  .attr('class', 'receive');
 let nodesGroup = svg.append('g')
   .attr('class', 'nodes');
 let routesGroup = svg.append('g')
   .attr('class', 'routes');
 let packetsGroup = svg.append('g')
   .attr('class', 'packets');
+let broadcastGroup = svg.append('g')
+  .attr('class', 'broadcast');
 let tooltipGroup = svg.append('g')
   .attr('class', 'tooltip');
 
@@ -80,6 +87,10 @@ function getViewMode() {
 
 function getLabelMode() {
   return model.label;
+}
+
+function getBroadcastMode() {
+  return model.broadcast;
 }
 
 function initModel({ nodes, world, timeDistortion }) {
@@ -263,20 +274,61 @@ function transmitPacket({ source_id, target_ids, time, data }) {
   if (parsedPacket.typeReadable === 'chat') {
     let nextHopNode = model.nodes.find((n) => n.mac === parsedPacket.receiverReadable);
     routesGroup.append('line')
-      .attr('x1', sourceNode.x)
-      .attr('y1', sourceNode.y)
-      .attr('x2', sourceNode.x)
-      .attr('y2', sourceNode.y)
-      .attr('stroke', 'lime')
-      .attr('stroke-dasharray', '40 20')
-      .attr('stroke-width', 5)
-      .attr('opacity', 1)
+        .attr('x1', sourceNode.x)
+        .attr('y1', sourceNode.y)
+        .attr('x2', sourceNode.x)
+        .attr('y2', sourceNode.y)
+        .attr('stroke', 'lime')
+        .attr('stroke-dasharray', '40 20')
+        .attr('stroke-width', 5)
+        .attr('opacity', 1)
+        .transition()
+          .duration(getAnimationTime(time))
+          .attr('x2', nextHopNode.x)
+          .attr('y2', nextHopNode.y)
+          .transition()
+          .duration(5000)
+            .attr('opacity', 0)
+            .remove();
+  }
+
+  // Highlight node if it is intended receiver
+  if (parsedPacket.typeReadable === 'chat') {
+    let nextHopNode = model.nodes.find((n) => n.mac === parsedPacket.receiverReadable);
+    if(parsedPacket.receiverReadable === parsedPacket.destinationReadable){
+      receiveGroup.append('circle')
+      .attr('cx', nextHopNode.x)
+      .attr('cy', nextHopNode.y)
+      .attr('r', 40)
+      .style('fill', 'rgba(255, 0, 0, 1)')
+      .attr('opacity', 0)
       .transition()
         .duration(getAnimationTime(time))
-        .attr('x2', nextHopNode.x)
-        .attr('y2', nextHopNode.y)
+        .attr('opacity', 1)
         .transition()
         .duration(5000)
+          .attr('opacity', 0)
+          .remove();
+    }
+  }
+
+  // Draw broadcast circle, if enabled and is broadcast or routing packet
+  if (getBroadcastMode() === 'on' && 
+    (parsedPacket.receiverReadable === 'ffffffff' || 
+    parsedPacket.receiverReadable === 'afffffff')) {
+      broadcastGroup.append('circle')
+      .attr('cx', sourceNode.x)
+      .attr('cy', sourceNode.y)
+      .attr('r', 40)
+      .attr('stroke', 'lime')
+      .attr('stroke-width', 5)
+      .attr('opacity', 0)
+      .transition()
+        .duration(getAnimationTime(time))
+        .attr('r', sourceNode.range)
+        .attr('opacity', .3)
+        .transition()
+        .duration(2000)
           .attr('opacity', 0)
           .remove();
   }
@@ -322,6 +374,11 @@ window.setTimeDistortion = (timeDistortion) => {
 window.setLabelMode = function(label) {
   model.label = label;
   updateLabels();
+  renderControls();
+}
+
+window.setBroadcastMode = function(broadcast) {
+  model.broadcast = broadcast;
   renderControls();
 }
 

@@ -26,6 +26,11 @@
         <div class="button" my-model="mode" my-value="packet" onclick="setViewMode('packet')">packet</div>
       </div>
       <div class="control-row">
+        <div class="control-title">broadcast visual:</div>
+        <div class="button" my-model="broadcast" my-value="on" onclick="setBroadcastMode('on')">on</div>
+        <div class="button" my-model="broadcast" my-value="off" onclick="setBroadcastMode('off')">off</div>
+      </div>
+      <div class="control-row">
         <div class="control-title">simulation speed:</div>
         <div class="button" my-model="timeDistortion" my-value="10" onclick="setTimeDistortion(10)">0.1x</div>
         <div class="button" my-model="timeDistortion" my-value="4" onclick="setTimeDistortion(4)">0.25x</div>
