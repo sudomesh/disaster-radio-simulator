@@ -1,6 +1,6 @@
-#include "SerialClient.h"
+#include "SocatClient.h"
 
-int SerialClient::set_interface_attribs(int speed, int parity)
+int SocatClient::set_interface_attribs(int speed, int parity)
 {
   struct termios tty;
   if (tcgetattr (tty_file, &tty) != 0)
@@ -39,7 +39,7 @@ int SerialClient::set_interface_attribs(int speed, int parity)
   return 0;
 }
 
-bool SerialClient::init(){
+bool SocatClient::init(){
   tty_file = open(portname.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
   if(tty_file < 0)
   {
@@ -54,7 +54,7 @@ bool SerialClient::init(){
   return true;
 }
 
-void SerialClient::loop(){
+void SocatClient::loop(){
   if(serialInitialized){
     char buffer[100];
     ssize_t length = read(tty_file, &buffer, sizeof(buffer));
@@ -85,7 +85,7 @@ void SerialClient::loop(){
   }
 }
 
-void SerialClient::receive(struct Datagram datagram, size_t len)
+void SocatClient::receive(struct Datagram datagram, size_t len)
 {
   write(tty_file, datagram.message, len - DATAGRAM_HEADER);
 };

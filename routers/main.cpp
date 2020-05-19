@@ -12,7 +12,7 @@
 // client
 #include "client/WebSocketppClient.h"
 #include "client/LoRaClient.h"
-#include "client/SerialClient.h"
+#include "client/SocatClient.h"
 
 // middleware
 #include "middleware/Console.h"
@@ -57,7 +57,7 @@ void setupLoRa()
   Serial.printf(" --> Failed to initialize LoRa\r\n");
 }
 
-void setupSerial()
+void setupSocat()
 {
   Serial.printf("* Initializing Serial...\r\n");
 
@@ -67,15 +67,15 @@ void setupSerial()
   std::string portname = port + number;
 
   Serial.printf(" --> connect to %s\r\n", portname.c_str());
-  SerialClient *serial_client = new SerialClient(portname);
-  if(serial_client->init()){
+  SocatClient *socat_client = new SocatClient(portname);
+  if(socat_client->init()){
     Serial.printf(" --> Serial initialized and connected\r\n");
   }
   else{
     Serial.printf(" --> Serial initialized, no device connected\r\n");
   }
   radio->connect(new Console())
-    ->connect(serial_client);
+    ->connect(socat_client);
 }
 
 void setupWebSocket(){
@@ -93,7 +93,7 @@ int setup(){
 
     srand(time(NULL) + getpid());
     setupLoRa();
-    setupSerial();
+    setupSocat();
     setupWebSocket();
     // random blocking wait at boot
     int wait = rand()%maxRandomDelay();

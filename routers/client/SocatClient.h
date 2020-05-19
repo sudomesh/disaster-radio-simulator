@@ -1,5 +1,5 @@
-#ifndef SERIALCLIENT_H
-#define SERIALCLIENT_H
+#ifndef SOCATCLIENT_H
+#define SOCATCLIENT_H
 
 #include <stdio.h>
 #include <errno.h>
@@ -15,10 +15,10 @@
 #include "../simulator.h"
 #endif
 
-class SerialClient : public DisasterClient
+class SocatClient : public DisasterClient
 {
   public:
-    SerialClient(std::string name) 
+    SocatClient(std::string name) 
     : portname{name}{};
 
     int set_interface_attribs(int speed, int parity);

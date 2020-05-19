@@ -5,9 +5,11 @@
 
 #include <Layer1.h>
 #include <LoRaLayer2.h>
-//#include "settings/settings.h"
 #include "../utils/utils.h"
 #include "../simulator.h"
+#ifndef SIM
+#include "settings/settings.h"
+#endif
 
 #include <vector>
 
@@ -28,13 +30,13 @@ void Console::printf(const char* format, ...)
 
 void Console::setup()
 {
-  /*
+  #ifndef SIM
   DisasterMiddleware::setup();
   if (history)
   {
     history->replay(this);
   }
-  */
+  #endif
   sessionConnected = 0;
 }
 
@@ -82,7 +84,7 @@ void Console::processLine(char *message, size_t len)
       server->disconnect(this);
       server->connect(client);
     }
-    /*
+    #ifndef SIM
     else if ((strncmp(&args[0][1], "set", 3) == 0) && (args.size() > 1))
     {
       #ifdef DEBUG_OUT
@@ -140,10 +142,9 @@ void Console::processLine(char *message, size_t len)
       #endif
       ESP.restart();
     }
-    */
+    #endif
     else if ((strncmp(&args[0][1], "lora", 4) == 0))
     {
-
       char str[ADDR_LENGTH*2 + 1] = {'\0'};
       char str2[256] = {'\0'}; //TODO: need to check size of routing table to allocate correct amount of memory
       hexToChar(str, LL2.localAddress(), ADDR_LENGTH);
@@ -157,7 +158,7 @@ void Console::processLine(char *message, size_t len)
       client->receive(response, msgLen + DATAGRAM_HEADER);
     }
   }
-  /*
+  #ifndef SIM
   else if (username.length() > 0)
   {
     msgLen = sprintf((char *)response.message, "00c|<%s>%s", username.c_str(), msgBuff);
@@ -170,7 +171,7 @@ void Console::processLine(char *message, size_t len)
     Serial.printf("Console message =>%s<\r\n", &response.message[4]);
     #endif
   }
-  */
+  #endif
   else if(msgBuff[0] == '@')
   {
     // "direct"/routed message
@@ -203,14 +204,13 @@ void Console::printBanner()
   printf("/ _  / (_-</ _ `(_-</ __/ -_) __/ _   / __/ _ `/ _  / / _ \\\r\n");
   printf("\\_,_/_/___/\\_,_/___/\\__/\\__/_/   (_) /_/  \\_,_/\\_,_/_/\\___/\r\n");
   printf("v1.0.0-rc.1\r\n");
-
-  /*
+  #ifndef SIM
   if(Layer1.loraInitialized()){
-    print("LoRa transceiver connected\r\n");
+    printf("LoRa transceiver connected\r\n");
   }else{
-    print("WARNING: LoRa transceiver not found!\r\n");
+    printf("WARNING: LoRa transceiver not found!\r\n");
   }
-  */
+  #endif
   char *str = (char*)malloc(ADDR_LENGTH*2 + 1);// = {'\0'};
   hexToChar(str, LL2.localAddress(), ADDR_LENGTH);
   printf("Local address of your node is %s\r\n", str);
@@ -220,18 +220,18 @@ void Console::printBanner()
 
 void Console::printPrompt()
 {
-  /*
+  #ifndef SIM
   if (username.length() > 0)
   {
-    print("<");
-    print(username.c_str());
-    print("> ");
+    printf("<%s> ", username.c_str());
   }
   else
   {
-  */
     printf("< > ");
-  //}
+  }
+  #else
+  printf("< > ");
+  #endif
 }
 
 void Console::transmit(DisasterClient *client, struct Datagram datagram, size_t len)

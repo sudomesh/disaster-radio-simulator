@@ -8,7 +8,7 @@ mkdir -p libs
 cd libs/
 git clone https://github.com/sudomesh/LoRaLayer2
 cd LoRaLayer2/
-git checkout 1f488a9a6d0fb865018c3f316b0f23e12ed0bf42
+git checkout 3f650076c1e1ff97d33c8aab20fb844528822542
 cd ../
 git clone https://github.com/bombela/backward-cpp
 cd backward-cpp

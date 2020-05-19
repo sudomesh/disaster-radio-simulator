@@ -12,7 +12,7 @@ CPP_FILES=$(LL2LIB)/Layer1_Sim.cpp \
   ./server/DisasterRadio.cpp \
   ./client/WebSocketppClient.cpp \
   ./client/LoRaClient.cpp \
-  ./client/SerialClient.cpp \
+  ./client/SocatClient.cpp \
   ./middleware/Console.cpp \
   utils/utils.cpp \
   simulator.c \
