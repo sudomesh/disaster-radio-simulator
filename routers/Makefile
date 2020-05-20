@@ -1,6 +1,7 @@
 
 all: firmware
 
+DRLIB=./libs/disaster-radio/firmware/src
 LL2LIB=./libs/LoRaLayer2/src
 DEBUGLIB = ./libs/backward-cpp
 
@@ -8,18 +9,18 @@ FLAGS=-lbfd -ldl -pthread -DBACKWARD_HAS_BFD=1 -DSIM -DBOOST_ERROR_CODE_HEADER_O
 
 CPP_FILES=$(LL2LIB)/Layer1_Sim.cpp \
   $(LL2LIB)/LoRaLayer2.cpp \
-  DisasterMiddleware.cpp \
-  ./server/DisasterRadio.cpp \
-  ./client/WebSocketppClient.cpp \
-  ./client/LoRaClient.cpp \
-  ./client/SocatClient.cpp \
-  ./middleware/Console.cpp \
-  utils/utils.cpp \
+  $(DRLIB)/DisasterMiddleware.cpp \
+  $(DRLIB)/server/DisasterRadio.cpp \
+  $(DRLIB)/client/WebSocketppClient.cpp \
+  $(DRLIB)/client/LoRaClient.cpp \
+  $(DRLIB)/client/SocatClient.cpp \
+  $(DRLIB)/middleware/Console.cpp \
+  $(DRLIB)/utils/utils.cpp \
   simulator.c \
   main.cpp
 
 firmware: main.cpp
-	g++ -g -I$(LL2LIB) -I$(DEBUGLIB) -o firmware $(CPP_FILES) $(FLAGS)
+	g++ -g -I$(LL2LIB) -I$(DEBUGLIB) -I$(DRLIB) -o firmware $(CPP_FILES) $(FLAGS)
 
 clean:
 	rm -f firmware 
