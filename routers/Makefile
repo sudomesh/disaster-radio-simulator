@@ -9,6 +9,7 @@ FLAGS=-lbfd -ldl -pthread -DBACKWARD_HAS_BFD=1 -DSIM -DBOOST_ERROR_CODE_HEADER_O
 
 CPP_FILES=$(LL2LIB)/Layer1_Sim.cpp \
   $(LL2LIB)/LoRaLayer2.cpp \
+  $(LL2LIB)/packetBuffer.cpp \
   $(DRLIB)/DisasterMiddleware.cpp \
   $(DRLIB)/server/DisasterRadio.cpp \
   $(DRLIB)/client/WebSocketppClient.cpp \

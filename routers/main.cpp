@@ -1,7 +1,7 @@
 //#define BACKWARD_HAS_DW 1
 #include "simulator.h"
 #include <backward.cpp>
-#include <Layer1.h>
+#include <Layer1_Sim.h>
 #include <LoRaLayer2.h>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
@@ -20,6 +20,8 @@
 int nodeID = 1;
 std::string root = "../routers/static/";
 
+Layer1Class *Layer1 = new Layer1Class();
+LL2Class *LL2 = new LL2Class(Layer1);
 DisasterRadio *radio = new DisasterRadio();
 
 int state = 0;
@@ -31,24 +33,24 @@ int _learningTimeout = 200;
 int _maxRandomDelay = 20;
 
 int routeInterval(){
-        return Layer1.simulationTime(_routeInterval);
+        return Layer1->simulationTime(_routeInterval);
 }
 int learningTimeout(){
-        return Layer1.simulationTime(_learningTimeout);
+        return Layer1->simulationTime(_learningTimeout);
 }
 int maxRandomDelay(){
-        return Layer1.simulationTime(_maxRandomDelay);
+        return Layer1->simulationTime(_maxRandomDelay);
 }
 
 void setupLoRa()
 {
   Serial.printf("* Initializing LoRaLayer2...\r\n");
-  uint8_t* myAddress = LL2.localAddress();
-  LoRaClient *lora_client = new LoRaClient();
+  uint8_t* myAddress = LL2->localAddress();
+  LoRaClient *lora_client = new LoRaClient(LL2);
   if (lora_client->init())
   {
     Serial.printf(" --> init succeeded...");
-    nodeID = Layer1.nodeID();
+    nodeID = Layer1->nodeID();
     Serial.printf("node ID: %i\r\n", nodeID);
     radio->connect(lora_client);
     //loraInitialized = true;
@@ -106,7 +108,7 @@ int loop(){
     radio->loop();
     // nsleep sets time out for reading packet from STDIN
     // setting this helps always read packet correctly
-    nsleep(0, 100000*Layer1.simulationTime(1));
+    nsleep(0, 100000*Layer1->simulationTime(1));
 }
 
 int main(int argc, char **argv) {
@@ -115,13 +117,13 @@ int main(int argc, char **argv) {
     while ((opt = getopt(argc, argv, "t:a:n:")) != -1) {
         switch (opt) {
             case 't':
-                Layer1.setTimeDistortion(strtod(optarg, NULL));
+                Layer1->setTimeDistortion(strtod(optarg, NULL));
                 break;
             case 'a':
-                LL2.setLocalAddress(optarg);
+                LL2->setLocalAddress(optarg);
                 break;
             case 'n':
-                Layer1.setNodeID(atoi(optarg));
+                Layer1->setNodeID(atoi(optarg));
                 break;
             default:
                 perror("Bad args\n");

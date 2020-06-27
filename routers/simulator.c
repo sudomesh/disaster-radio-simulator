@@ -120,13 +120,16 @@ int simulator_setup_loop(){
       if(meta){
         // this is meta data message from simualtor,
         // parse for configuration updates
-        if(ret = Layer1.parse_metadata(buffer, len)){
+        if(ret = Layer1->parse_metadata(buffer, len)){
           return ret;
         }
       }
       else{
-        // this is a normal packet, write to LL2 buffer
-        LL2.writePacket((uint8_t*)buffer, len);
+        // this is a normal packet, write to Layer1 rx buffer
+        BufferEntry entry;
+        memcpy(&entry.data[0], &buffer[0], len);
+        entry.length = len;
+        Layer1->rxBuffer->write(entry);
         #ifdef DEBUG
         Serial.printf("Layer1::receive(): buffer = ");
         for(int i = 0; i < len; i++){
@@ -142,7 +145,7 @@ int simulator_setup_loop(){
     gettimeofday(&end, NULL);
     long seconds = (end.tv_sec - start.tv_sec);
     long micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-    Layer1.setTime((int)(micros/1000));
+    Layer1Class::setTime((int)(micros/1000));
     // call main loop
     if(ret = loop()) {
       return ret;

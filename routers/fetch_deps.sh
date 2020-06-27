@@ -9,12 +9,12 @@ cd libs/
 
 git clone https://github.com/sudomesh/LoRaLayer2
 cd LoRaLayer2/
-git checkout 3f650076c1e1ff97d33c8aab20fb844528822542
+git checkout 5fc98c99706b7883b49ece82d9a7abc1b35e0bae
 cd ../
 
 git clone https://github.com/sudomesh/disaster-radio
 cd disaster-radio/
-git checkout 875396a7c679d5105ec5e587ba295c2a486609b5
+git checkout 43075131149f1456c2364c3cf8fbb5121cefae65
 cd ../
 
 git clone https://github.com/bombela/backward-cpp
