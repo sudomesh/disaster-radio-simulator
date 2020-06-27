@@ -14,7 +14,7 @@ cd ../
 
 git clone https://github.com/sudomesh/disaster-radio
 cd disaster-radio/
-git checkout 43075131149f1456c2364c3cf8fbb5121cefae65
+git checkout 9d137b4f5f8d88131f2c0b4dd2e638cf73cfec5a
 cd ../
 
 git clone https://github.com/bombela/backward-cpp
