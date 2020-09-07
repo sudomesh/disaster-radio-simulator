@@ -5,4 +5,5 @@ routers/libs
 routers/firmware
 routers/static/index.htm
 routers/static/build
+routers/socatSockets
 package-lock.json

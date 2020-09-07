@@ -3,8 +3,6 @@
 #include <backward.cpp>
 #include <Layer1_Sim.h>
 #include <LoRaLayer2.h>
-#include <websocketpp/config/asio_no_tls.hpp>
-#include <websocketpp/server.hpp>
 
 // server
 #include "server/DisasterRadio.h"
@@ -79,16 +77,26 @@ void setupSocat()
   radio->connect(new Console())
     ->connect(socat_client);
 }
+void setupSocatSocket()
+{
+  // Sets up an open socat connection that bypasses console
+  // intended to be accessed by socatSocket.cpp
+  Serial.printf("* Initializing SocatSocket...\r\n");
 
-void setupWebSocket(){
-  Serial.printf("* WebSocketpp not initialized...\r\n");
-  /* TODO: Websocketpp polling cause seg fault inside of loop?
-  uint16_t port = 8000 + nodeID;
-  Serial.printf("* Initializing WebSocketpp...\r\n");
-  WebSocketppClient *ws_client = new WebSocketppClient();
-  ws_client->startServer(port, root);
-  radio->connect(ws_client);
-  */
+  // append nodeID to tty port (used string out of convience)
+  std::string port = "./tty/WS";
+  std::string number = std::to_string(nodeID);
+  std::string portname = port + number;
+
+  Serial.printf(" --> socatSocket available at %s\r\n", portname.c_str());
+  SocatClient *socat_client = new SocatClient(portname);
+  if(socat_client->init()){
+    Serial.printf(" --> socatSocket initialized and connected\r\n");
+  }
+  else{
+    Serial.printf(" --> socatSocket initialized, no device connected\r\n");
+  }
+  radio->connect(socat_client);
 }
 
 int setup(){
@@ -96,7 +104,7 @@ int setup(){
     srand(time(NULL) + getpid());
     setupLoRa();
     setupSocat();
-    setupWebSocket();
+    setupSocatSocket();
     // random blocking wait at boot
     int wait = rand()%maxRandomDelay();
     Serial.printf("[node %d] waiting %d s\n", nodeID, wait);
@@ -137,3 +145,4 @@ int main(int argc, char **argv) {
     // executes setup and loop functions
     return ret;
 }
+
